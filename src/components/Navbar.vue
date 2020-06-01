@@ -16,16 +16,14 @@
       <ul class="navbar-nav mr-auto">
         <router-link
           class="nav-item mx-5 my-2"
-          :class="{ active: activeMenu === 'disasters' }"
-          @click="activeMenu = 'disasters'"
+          :class="{ active: getActiveMenu === 'disasters' }"
           to="/disasters"
         >
           Disasters
         </router-link>
         <router-link
           class="nav-item mx-5 my-2"
-          :class="{ active: activeMenu === 'fundraisings' }"
-          @click="activeMenu = 'fundraisings'"
+          :class="{ active: getActiveMenu === 'fundraisings' }"
           to="/fundraisings"
         >
           Fundraisings
@@ -45,7 +43,7 @@
         </div>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
           <div class="dropdown-header">Menus</div>
-          <div v-for="(menu, idx) in dropdown.menus[`${user.role.toLowerCase()}`]" :key="idx">
+          <div v-for="menu in dropdown.menus[`${user.role.toLowerCase()}`]" :key="menu.name">
             <router-link class="dropdown-item" :to="menu.link">
               <img class="img-menu" :src="require('@/assets/img/' + menu.img)" />
               {{ menu.name }}
@@ -53,7 +51,7 @@
           </div>
           <div class="dropdown-divider"></div>
           <div class="dropdown-header">Account</div>
-          <div v-for="(menu, idx) in dropdown.account" :key="idx">
+          <div v-for="menu in dropdown.account" :key="menu.name">
             <router-link class="dropdown-item" :to="menu.link">
               <img class="img-menu" :src="require('@/assets/img/' + menu.img)" />
               {{ menu.name }}
@@ -66,9 +64,9 @@
           </router-link>
         </div>
       </div>
-      <router-link v-else to="/login">
-        <button class="btn mx-5 my-2">Login</button>
-      </router-link>
+      <!-- <router-link v-else to="/login"> -->
+        <button class="btn mx-5 my-2" @click="updateActiveMenu('fundraisings')">Login</button>
+      <!-- </router-link> -->
     </div>
   </nav>
 </template>
@@ -77,8 +75,12 @@
 export default {
   name: 'Navbar',
   props: {
-    activeMenu: String,
     user: Object,
+  },
+  computed: {
+    getActiveMenu() {
+      return this.$route.path.split('/')[1];
+    },
   },
   data() {
     return {

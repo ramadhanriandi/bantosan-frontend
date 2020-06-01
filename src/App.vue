@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Navbar :activeMenu="active_menu" :user="user" />
+    <Navbar :user="user" />
     <router-view/>
   </div>
 </template>
@@ -15,7 +15,6 @@ export default {
   },
   data() {
     return {
-      active_menu: 'disasters',
       user: {
         username: 'your_username',
         role: 'User',
