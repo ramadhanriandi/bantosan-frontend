@@ -21,11 +21,56 @@
           Fundraisings
         </router-link>
       </ul>
-      <div class="">
-        <router-link to="/login">
-          <button class="btn mx-5 my-2">Login</button>
-        </router-link>
+      <div class="nav-item dropdown">
+        <div
+          class="nav-link dropdown-toggle"
+          id="navbarDropdown"
+          role="button"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
+          <img class="img-avatar" src="@/assets/img/small-avatar.png" />
+          your_username
+        </div>
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+          <div class="dropdown-header">Menus</div>
+          <router-link class="dropdown-item" to="/reported-disaster">
+            <img class="img-menu" src="@/assets/img/menu-disaster.png" />
+            Reported Disaster
+          </router-link>
+          <router-link class="dropdown-item" to="/your-fundraising">
+            <img class="img-menu" src="@/assets/img/menu-fundraising.png" />
+            Your Fundraising
+          </router-link>
+          <!-- <router-link class="dropdown-item" to="/users">
+            <img class="img-menu" src="@/assets/img/menu-user.png" />
+            User List
+          </router-link> -->
+          <router-link class="dropdown-item" to="/donation-history">
+            <img class="img-menu" src="@/assets/img/menu-donation.png" />
+            Donation History
+          </router-link>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-header">Account</div>
+          <router-link class="dropdown-item" to="/profile">
+            <img class="img-menu" src="@/assets/img/menu-profile.png" />
+            Profile
+          </router-link>
+          <router-link class="dropdown-item" to="/change-password">
+            <img class="img-menu" src="@/assets/img/menu-password.png" />
+            Change Password
+          </router-link>
+          <div class="dropdown-divider"></div>
+          <router-link class="dropdown-item" to="/login">
+            <img class="img-menu" src="@/assets/img/menu-logout.png" />
+            Logout
+          </router-link>
+        </div>
       </div>
+      <!-- <router-link to="/login">
+        <button class="btn mx-5 my-2">Login</button>
+      </router-link> -->
     </div>
   </nav>
 </template>
@@ -58,8 +103,30 @@ nav {
   font-weight: 500;
 }
 
-.nav-item {
+.dropdown-header {
+  color: #BFBFBF;
+  font-size: 10px;
+}
+
+.dropdown-item {
+  font-size: 12px;
+}
+
+.dropdown-item, .nav-item {
   color: #333333;
+}
+
+.img-avatar {
+  height: 36px;
+  margin-right: 12px;
+}
+
+.img-menu {
+  height: 20px;
+  margin-right: 8px;
+}
+
+.nav-item {
   font-size: 14px;
 }
 
