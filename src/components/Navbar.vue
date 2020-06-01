@@ -14,14 +14,24 @@
     </button>
     <div class="collapse navbar-collapse" id="navbar-toggler-items">
       <ul class="navbar-nav mr-auto">
-        <router-link class="nav-item mx-5 my-2" to="/disasters">
+        <router-link
+          class="nav-item mx-5 my-2"
+          :class="{ active: activeMenu === 'disasters' }"
+          @click="activeMenu = 'disasters'"
+          to="/disasters"
+        >
           Disasters
         </router-link>
-        <router-link class="nav-item mx-5 my-2" to="/fundraisings">
+        <router-link
+          class="nav-item mx-5 my-2"
+          :class="{ active: activeMenu === 'fundraisings' }"
+          @click="activeMenu = 'fundraisings'"
+          to="/fundraisings"
+        >
           Fundraisings
         </router-link>
       </ul>
-      <div class="nav-item dropdown">
+      <div v-if="user && user.username" class="nav-item dropdown">
         <div
           class="nav-link dropdown-toggle"
           id="navbarDropdown"
@@ -31,46 +41,34 @@
           aria-expanded="false"
         >
           <img class="img-avatar" src="@/assets/img/small-avatar.png" />
-          your_username
+          {{ user.username }}
         </div>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
           <div class="dropdown-header">Menus</div>
-          <router-link class="dropdown-item" to="/reported-disaster">
-            <img class="img-menu" src="@/assets/img/menu-disaster.png" />
-            Reported Disaster
-          </router-link>
-          <router-link class="dropdown-item" to="/your-fundraising">
-            <img class="img-menu" src="@/assets/img/menu-fundraising.png" />
-            Your Fundraising
-          </router-link>
-          <!-- <router-link class="dropdown-item" to="/users">
-            <img class="img-menu" src="@/assets/img/menu-user.png" />
-            User List
-          </router-link> -->
-          <router-link class="dropdown-item" to="/donation-history">
-            <img class="img-menu" src="@/assets/img/menu-donation.png" />
-            Donation History
-          </router-link>
+          <div v-for="(menu, idx) in dropdown.menus[`${user.role.toLowerCase()}`]" :key="idx">
+            <router-link class="dropdown-item" :to="menu.link">
+              <img class="img-menu" :src="require('@/assets/img/' + menu.img)" />
+              {{ menu.name }}
+            </router-link>
+          </div>
           <div class="dropdown-divider"></div>
           <div class="dropdown-header">Account</div>
-          <router-link class="dropdown-item" to="/profile">
-            <img class="img-menu" src="@/assets/img/menu-profile.png" />
-            Profile
-          </router-link>
-          <router-link class="dropdown-item" to="/change-password">
-            <img class="img-menu" src="@/assets/img/menu-password.png" />
-            Change Password
-          </router-link>
+          <div v-for="(menu, idx) in dropdown.account" :key="idx">
+            <router-link class="dropdown-item" :to="menu.link">
+              <img class="img-menu" :src="require('@/assets/img/' + menu.img)" />
+              {{ menu.name }}
+            </router-link>
+          </div>
           <div class="dropdown-divider"></div>
-          <router-link class="dropdown-item" to="/login">
-            <img class="img-menu" src="@/assets/img/menu-logout.png" />
-            Logout
+          <router-link class="dropdown-item" :to="dropdown.logout.link">
+            <img class="img-menu" :src="require('@/assets/img/' + dropdown.logout.img)" />
+            {{ dropdown.logout.name }}
           </router-link>
         </div>
       </div>
-      <!-- <router-link to="/login">
+      <router-link v-else to="/login">
         <button class="btn mx-5 my-2">Login</button>
-      </router-link> -->
+      </router-link>
     </div>
   </nav>
 </template>
@@ -81,6 +79,29 @@ export default {
   props: {
     activeMenu: String,
     user: Object,
+  },
+  data() {
+    return {
+      dropdown: {
+        menus: {
+          admin: [
+            { name: 'Reported Disaster', img: 'menu-disaster.png', link: '/reported-disaster' },
+            { name: 'Fundraising List', img: 'menu-fundraising.png', link: '/fundraising-list' },
+            { name: 'User List', img: 'menu-user.png', link: '/user-list' },
+          ],
+          user: [
+            { name: 'Reported Disaster', img: 'menu-disaster.png', link: '/reported-disaster' },
+            { name: 'Your Fundraising', img: 'menu-fundraising.png', link: '/your-fundraising' },
+            { name: 'Donation History', img: 'menu-donation.png', link: '/donation-history' },
+          ],
+        },
+        account: [
+          { name: 'Profile', img: 'menu-profile.png', link: '/profile' },
+          { name: 'Change Password', img: 'menu-password.png', link: '/change-password' },
+        ],
+        logout: { name: 'Logout', img: 'menu-logout.png', link: '/login' },
+      },
+    };
   },
 };
 </script>
