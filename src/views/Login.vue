@@ -68,7 +68,7 @@ export default {
       if (this.username === 'existed_username') {
         this.errors.username = 'Username already exists';
       }
-      if (this.password.length !== 'password') {
+      if (this.password !== 'password') {
         this.errors.password = 'Wrong password';
       }
 
