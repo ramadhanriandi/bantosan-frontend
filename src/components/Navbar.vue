@@ -109,8 +109,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/assets/scss/color.scss';
+
 nav {
-  border-bottom: 1px solid #BFBFBF;
+  border-bottom: 1px solid $LIGHT_GREY;
   height: 80px;
 }
 
@@ -119,15 +121,15 @@ nav {
 }
 
 .btn {
-  background: #630FD1;
-  color: white;
+  background: $PURPLE;
+  color: $WHITE;
   height: 36px;
   font-size: 12px;
   font-weight: 500;
 }
 
 .dropdown-header {
-  color: #BFBFBF;
+  color: $LIGHT_GREY;
   font-size: 10px;
 }
 
@@ -136,7 +138,7 @@ nav {
 }
 
 .dropdown-item, .nav-item {
-  color: #333333;
+  color: $BLACK;
 }
 
 .img-avatar {
@@ -158,13 +160,13 @@ nav {
 }
 
 .navbar-brand, .navbar-brand:focus, .navbar-brand:hover {
-  color: #FF6565;
+  color: $RED;
   font-size: 24px;
   font-weight: 700;
 }
 
 #navbar-toggler-items {
-  background: white;
+  background: $WHITE;
   text-align: right;
 }
 </style>
