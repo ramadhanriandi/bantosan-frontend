@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <Navbar :user="user" />
-    <router-view/>
+    <div class="container d-flex h-100 justify-content-center py-5">
+      <router-view/>
+    </div>
   </div>
 </template>
 
@@ -26,11 +28,12 @@ export default {
 
 <style lang="scss">
 @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
+@import '@/assets/scss/color.scss';
 
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #333333;
+  color: $BLACK;
   font-family: 'Rubik', sans-serif;
   font-size: 12px;
   font-weight: 400;
