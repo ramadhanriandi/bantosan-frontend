@@ -1,6 +1,6 @@
 <template>
   <form class="border-wrapper w-50 p-5" @submit="submitForm" method="post">
-    <h1 class="title mb-2">Welcome Back</h1>
+    <h1 class="title mb-2">{{ isAdmin ? 'Admin Login' : 'Welcome Back' }}</h1>
     <p class="subtitle mb-4">Fill in the form below to sign into your account</p>
     <div class="form-group">
       <input
@@ -40,7 +40,7 @@
       </small>
     </div>
     <button class="btn my-2 w-100" type="submit">Login</button>
-    <p class="footer-note">
+    <p v-if="!isAdmin" class="footer-note">
       Don't have an account ?
       <router-link class="footer-redirect" to="/register">Register here</router-link>
     </p>
@@ -51,6 +51,11 @@
 import _ from 'lodash';
 
 export default {
+  computed: {
+    isAdmin() {
+      return this.$route.path.split('/')[1] === 'admin';
+    },
+  },
   data: () => ({
     errors: {},
     username: null,
