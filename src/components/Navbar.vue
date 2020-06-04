@@ -64,9 +64,9 @@
           </router-link>
         </div>
       </div>
-      <router-link v-else to="/login">
+      <!-- <router-link v-else to="/login"> -->
         <button class="btn mx-5 my-2">Login</button>
-      </router-link>
+      <!-- </router-link> -->
     </div>
   </nav>
 </template>
@@ -120,14 +120,6 @@ nav {
   font-weight: 500;
 }
 
-.btn {
-  background: $PURPLE;
-  color: $WHITE;
-  height: 36px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
 .dropdown-header {
   color: $LIGHT_GREY;
   font-size: 10px;
@@ -151,11 +143,8 @@ nav {
   margin-right: 8px;
 }
 
-.nav-item {
+.nav-item, .nav-item:hover {
   font-size: 14px;
-}
-
-.nav-item:hover {
   text-decoration: none;
 }
 

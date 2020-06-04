@@ -119,7 +119,7 @@ export default {
         this.errors.confirmPassword = 'Password confirmation doesn\'t match';
       }
 
-      if (_.isEmpty(this.errors) && this.username && this.age && this.password) {
+      if (_.isEmpty(this.errors) && this.username && this.email && this.password) {
         return true;
       }
 
@@ -132,67 +132,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import '@/assets/scss/color.scss';
-
-.border-wrapper {
-  border-radius: 14px;
-}
-
-.border-wrapper, .form-control {
-  border: 1px solid $LIGHT_GREY;
-}
-
-.btn {
-  background: $PURPLE;
-  color: $WHITE;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.btn, .form-control {
-  height: 41px;
-}
-
-.footer-note, .subtitle {
-  color: $GREY;
-}
-
-.footer-redirect {
-  color: $PURPLE;
-  font-weight: 500;
-}
-
-.footer-redirect:hover {
-  text-decoration: none;
-}
-
-.form-control {
-  font-size: 12px;
-}
-
-.form-control::placeholder {
-  color: $LIGHT_GREY;
-  font-size: 12px;
-}
-
-.form-text {
-  color: $RED;
-}
-
 .strength-meter {
   margin: 0 0;
-}
-
-.subtitle {
-  font-size: 10px;
-}
-
-.subtitle, .title {
-  text-align: left;
-}
-
-.title {
-  font-size: 24px;
-  font-weight: 500;
 }
 </style>
