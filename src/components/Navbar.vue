@@ -120,14 +120,6 @@ nav {
   font-weight: 500;
 }
 
-.btn {
-  background: $PURPLE;
-  color: $WHITE;
-  height: 36px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
 .dropdown-header {
   color: $LIGHT_GREY;
   font-size: 10px;
@@ -151,11 +143,8 @@ nav {
   margin-right: 8px;
 }
 
-.nav-item {
+.nav-item, .nav-item:hover {
   font-size: 14px;
-}
-
-.nav-item:hover {
   text-decoration: none;
 }
 

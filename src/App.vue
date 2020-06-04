@@ -39,4 +39,59 @@ export default {
   font-weight: 400;
   text-align: center;
 }
+
+.border-wrapper {
+  border-radius: 14px;
+}
+
+.border-wrapper, .form-control {
+  border: 1px solid $LIGHT_GREY;
+}
+
+.btn, .btn:hover {
+  background: $PURPLE;
+  color: $WHITE;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.btn, .form-control {
+  height: 41px;
+}
+
+.footer-note, .subtitle {
+  color: $GREY;
+}
+
+.footer-redirect, .footer-redirect:hover {
+  color: $PURPLE;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.form-control {
+  font-size: 12px;
+}
+
+.form-control::placeholder {
+  color: $LIGHT_GREY;
+  font-size: 12px;
+}
+
+.form-text {
+  color: $RED;
+}
+
+.subtitle {
+  font-size: 10px;
+}
+
+.subtitle, .title {
+  text-align: left;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 500;
+}
 </style>
