@@ -65,7 +65,7 @@
         </div>
       </div>
       <router-link v-else to="/login">
-        <button class="btn mx-5 my-2" @click="updateActiveMenu('fundraisings')">Login</button>
+        <button class="btn mx-5 my-2">Login</button>
       </router-link>
     </div>
   </nav>

@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Navbar :user="user" />
-    <div class="container h-100 py-5">
+    <div class="container d-flex h-100 justify-content-center py-5">
       <router-view/>
     </div>
   </div>
