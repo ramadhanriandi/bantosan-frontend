@@ -1,6 +1,5 @@
 <template>
   <div class="map">
-    <h2>Peta Dengan VueJs dan LeafletJs</h2>
     <div style="height: 600px; width: 100%">
       <l-map :zoom="zoom" :center="center">
         <l-marker :lat-lng="center"></l-marker>
