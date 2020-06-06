@@ -91,7 +91,7 @@
 <script>
 import _ from 'lodash';
 import Password from 'vue-password-strength-meter';
-import validEmail from '@/assets/js/utils';
+import utils from '@/assets/js/utils';
 
 export default {
   components: { Password },
@@ -109,7 +109,7 @@ export default {
       if (this.username === 'existed_username') {
         this.errors.username = 'Username already exists';
       }
-      if (!validEmail(this.email)) {
+      if (!utils.validEmail(this.email)) {
         this.errors.email = 'Invalid email format';
       }
       if (this.password.length < 6) {
