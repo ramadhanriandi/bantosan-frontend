@@ -59,6 +59,16 @@ export default {
   height: 41px;
 }
 
+.btn-small, .btn-small:hover {
+  background: $LIGHT_PURPLE;
+  border: none;
+  border-radius: 7px;
+  color: $PURPLE;
+  font-size: 10px;
+  font-weight: 700;
+  height: 28px;
+}
+
 .footer-note, .subtitle {
   color: $GREY;
 }

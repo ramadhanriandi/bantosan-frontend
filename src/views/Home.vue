@@ -23,7 +23,12 @@
       </div>
     </div>
     <div v-if="fundraisings.length > 0">
-      <h2 class="title mb-4">Help Them by Donating</h2>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="title">Help Them by Donating</h2>
+        <router-link to="/fundraisings">
+          <button class="btn-small px-3">Show More</button>
+        </router-link>
+      </div>
       <div class="row">
         <div
           class="col-6 col-sm-6 col-lg-3 mb-4 mb-sm-4 mb-lg-0"
@@ -36,7 +41,9 @@
     </div>
     <p class="question mt-5">
       Want to raise a fund ?
-      <router-link class="question-redirect" to="/login">Create it now</router-link>
+      <router-link class="question-redirect" to="/your-fundraising/create">
+        Create it now
+      </router-link>
     </p>
   </div>
 </template>
