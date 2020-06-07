@@ -1,10 +1,10 @@
 <template>
   <div class="w-100">
     <div class="row mb-5">
-      <div class="col-9">
-        <Map />
+      <div class="col-lg-9">
+        <Map class="mb-4 mb-sm-4 mb-lg-0"/>
       </div>
-      <div class="col-3 text-left">
+      <div class="col-lg-3 text-left">
         <h1 class="header">
           <span>{{ disasters.length }}</span> Disasters <br /> in Indonesia Currently
         </h1>
@@ -25,7 +25,11 @@
     <div v-if="fundraisings.length > 0">
       <h2 class="title mb-4">Help Them by Donating</h2>
       <div class="row">
-        <div class="col" v-for="fundraising in fundraisings" :key="fundraising.id">
+        <div
+          class="col-6 col-sm-6 col-lg-3 mb-4 mb-sm-4 mb-lg-0"
+          v-for="fundraising in fundraisings"
+          :key="fundraising.id"
+        >
           <CardItem :fundraising="fundraising" />
         </div>
       </div>
