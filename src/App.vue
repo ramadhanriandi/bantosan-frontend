@@ -48,18 +48,13 @@ export default {
   border: 1px solid $LIGHT_GREY;
 }
 
-.btn, .btn:hover {
-  background: $PURPLE;
-  color: $WHITE;
+.btn {
   font-size: 12px;
   font-weight: 500;
+  height: 38px;
 }
 
-.btn, .form-control {
-  height: 41px;
-}
-
-.btn-small-red, .btn-small-red:hover, .btn-small-purple, .btn-small-purple:hover {
+.btn-sm {
   border: none;
   border-radius: 7px;
   font-size: 10px;
@@ -67,12 +62,22 @@ export default {
   height: 28px;
 }
 
-.btn-small-red, .btn-small-red:hover {
+.btn-red, .btn-red:hover {
+  background: $RED;
+  color: $WHITE;
+}
+
+.btn-purple, .btn-purple:hover {
+  background: $PURPLE;
+  color: $WHITE;
+}
+
+.btn-red-reverse, .btn-red-reverse:hover {
   background: $LIGHT_RED;
   color: $RED;
 }
 
-.btn-small-purple, .btn-small-purple:hover {
+.btn-purple-reverse, .btn-purple-reverse:hover {
   background: $LIGHT_PURPLE;
   color: $PURPLE;
 }

@@ -1,34 +1,15 @@
 <template>
   <div class="w-100">
-    <div class="row mb-5">
-      <div class="col-lg-9">
-        <DisasterMap class="mb-4 mb-sm-4 mb-lg-0" :disasters="disasters" />
-      </div>
-      <div class="col-lg-3 text-left">
-        <h1 class="header">
-          <span>{{ disasters.length }}</span> Disasters <br /> in Indonesia Currently
-        </h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="title mb-2">Current Disasters in Indonesia</h2>
         <p v-if="disasters.length > 0" class="subtitle">Latest Update : {{ getLatestUpdate }}</p>
-        <div v-for="(count, title) in getSummary" :key="title">
-          <SummaryItem
-            :title="title"
-            :count="count"
-            :foreground="summary[title].foreground"
-            :background="summary[title].background"
-          />
-        </div>
-        <router-link to="/disasters" class="redirect">
-          Click here for details <span class="ml-1">>>></span>
-        </router-link>
       </div>
+      <router-link to="/fundraisings">
+        <button class="btn-sm btn-purple-reverse px-3">Create a disaster report</button>
+      </router-link>
     </div>
     <div v-if="fundraisings.length > 0">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="title">Help Them by Donating</h2>
-        <router-link to="/fundraisings">
-          <button class="btn-sm btn-purple-reverse px-3">Show More</button>
-        </router-link>
-      </div>
       <div class="row">
         <div
           class="col-6 col-sm-6 col-lg-3 mb-4 mb-sm-4 mb-lg-0"
@@ -52,14 +33,10 @@
 import _ from 'lodash';
 import utils from '@/assets/js/utils';
 import CardItem from '@/components/CardItem.vue';
-import DisasterMap from '@/components/DisasterMap.vue';
-import SummaryItem from '@/components/SummaryItem.vue';
 
 export default {
   components: {
     CardItem,
-    DisasterMap,
-    SummaryItem,
   },
   computed: {
     getLatestUpdate() {

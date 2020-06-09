@@ -15,14 +15,19 @@ const routes = [
     component: () => import('../views/Login.vue'),
   },
   {
-    path: '/login',
-    name: 'login',
-    component: () => import('../views/Login.vue'),
-  },
-  {
     path: '/change-password',
     name: 'changePassword',
     component: () => import('../views/ChangePassword.vue'),
+  },
+  {
+    path: '/disasters',
+    name: 'disasters',
+    component: () => import('../views/DisasterList.vue'),
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('../views/Login.vue'),
   },
   {
     path: '/register',

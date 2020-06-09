@@ -80,7 +80,7 @@
         {{ errors.confirmPassword }}
       </small>
     </div>
-    <button class="btn my-2 w-100" type="submit">Sign up</button>
+    <button class="btn btn-purple my-2 w-100" type="submit">Sign up</button>
     <p class="footer-note">
       Already have an account ?
       <router-link class="footer-redirect" to="/login">Login here</router-link>

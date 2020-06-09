@@ -63,7 +63,7 @@
         {{ errors.confirmPassword }}
       </small>
     </div>
-    <button class="btn my-2 w-100" type="submit">Save Changes</button>
+    <button class="btn btn-purple my-2 w-100" type="submit">Save Changes</button>
   </form>
 </template>
 

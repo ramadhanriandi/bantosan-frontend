@@ -65,7 +65,7 @@
         </div>
       </div>
       <router-link v-else to="/login">
-        <button class="btn mx-5 my-2">Login</button>
+        <button class="btn btn-purple mx-5 my-2">Login</button>
       </router-link>
     </div>
   </nav>
