@@ -1,13 +1,26 @@
 <template>
   <div class="w-100">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
+    <div class="d-flex align-items-center mb-4 row">
+      <div class="col-12 col-sm-12 col-lg-6">
         <h2 class="title mb-2">Current Disasters in Indonesia</h2>
-        <p v-if="disasters.length > 0" class="subtitle">Latest Update : {{ getLatestUpdate }}</p>
+        <p v-if="disasters.length > 0" class="subtitle mb-4 mb-sm-4 mb-lg-0">
+          Latest Update : {{ getLatestUpdate }}
+        </p>
       </div>
-      <router-link to="/fundraisings">
-        <button class="btn-sm btn-purple-reverse px-3">Create a disaster report</button>
-      </router-link>
+      <div class="col-12 col-sm-12 col-lg-6">
+        <div class="row px-3">
+          <div class="col form-group mb-0 p-0">
+            <input
+              type="text"
+              class="form-control p-3"
+              placeholder="Search"
+            />
+          </div>
+          <router-link class="ml-3 d-flex align-items-center" to="/fundraisings">
+            <button class="btn btn-red-reverse col px-3">Create a disaster report</button>
+          </router-link>
+        </div>
+      </div>
     </div>
     <div v-if="fundraisings.length > 0">
       <div class="row">

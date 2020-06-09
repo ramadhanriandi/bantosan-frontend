@@ -51,7 +51,7 @@ export default {
 .btn {
   font-size: 12px;
   font-weight: 500;
-  height: 38px;
+  height: 34px;
 }
 
 .btn-sm {
