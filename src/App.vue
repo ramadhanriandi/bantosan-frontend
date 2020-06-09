@@ -40,6 +40,11 @@ export default {
   text-align: center;
 }
 
+th {
+  color: $GREY;
+  font-weight: 500;
+}
+
 .border-wrapper {
   border-radius: 14px;
 }
@@ -82,6 +87,12 @@ export default {
   color: $PURPLE;
 }
 
+.empty-note {
+  color: $LIGHT_GREY;
+  font-size: 24px;
+  margin-top: 100px;
+}
+
 .footer-note, .subtitle {
   color: $GREY;
 }
@@ -103,6 +114,15 @@ export default {
 
 .form-text {
   color: $RED;
+}
+
+.page-link {
+  color: $PURPLE;
+}
+
+.page-link:hover {
+  color: $BLACK;
+  cursor: pointer;
 }
 
 .subtitle {
