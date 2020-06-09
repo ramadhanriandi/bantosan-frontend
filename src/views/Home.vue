@@ -2,7 +2,7 @@
   <div class="w-100">
     <div class="row mb-5">
       <div class="col-lg-9">
-        <Map class="mb-4 mb-sm-4 mb-lg-0"/>
+        <DisasterMap class="mb-4 mb-sm-4 mb-lg-0" :disasters="disasters" />
       </div>
       <div class="col-lg-3 text-left">
         <h1 class="header">
@@ -26,7 +26,7 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="title">Help Them by Donating</h2>
         <router-link to="/fundraisings">
-          <button class="btn-small px-3">Show More</button>
+          <button class="btn-small-purple px-3">Show More</button>
         </router-link>
       </div>
       <div class="row">
@@ -52,13 +52,13 @@
 import _ from 'lodash';
 import utils from '@/assets/js/utils';
 import CardItem from '@/components/CardItem.vue';
-import Map from '@/components/Map.vue';
+import DisasterMap from '@/components/DisasterMap.vue';
 import SummaryItem from '@/components/SummaryItem.vue';
 
 export default {
   components: {
     CardItem,
-    Map,
+    DisasterMap,
     SummaryItem,
   },
   computed: {
@@ -90,17 +90,39 @@ export default {
         Volcano: { foreground: 'yellow', background: 'light-yellow' },
       },
       disasters: [
-        { category: 'Flood', updatedAt: '2012-07-14T01:00:00+01:00' },
-        { category: 'Flood', updatedAt: '2013-07-14T01:00:00+01:00' },
-        { category: 'Earthquake', updatedAt: '2012-07-13T01:00:00+01:00' },
-        { category: 'Tsunami', updatedAt: '2020-05-13T01:00:00+01:00' },
-        { category: 'Wildfire', updatedAt: '2012-07-04T01:00:00+01:00' },
-        { category: 'Wildfire', updatedAt: '2012-07-14T01:00:00+01:00' },
-        { category: 'Wildfire', updatedAt: '2012-07-14T01:00:00+01:00' },
-        { category: 'Wildfire', updatedAt: '2012-07-14T01:00:00+01:00' },
-        { category: 'Landslide', updatedAt: '2012-07-14T01:00:00+01:00' },
-        { category: 'Landslide', updatedAt: '2012-07-14T01:00:00+01:00' },
-        { category: 'Volcano', updatedAt: '2012-07-14T01:00:00+01:00' },
+        {
+          id: '1', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-10, 125] } }, category: 'Flood', updatedAt: '2012-07-14T01:00:00+01:00',
+        },
+        {
+          id: '2', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-9, 120] } }, category: 'Flood', updatedAt: '2013-07-14T01:00:00+01:00',
+        },
+        {
+          id: '3', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-8, 110] } }, category: 'Earthquake', updatedAt: '2012-07-13T01:00:00+01:00',
+        },
+        {
+          id: '4', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-7, 115] } }, category: 'Tsunami', updatedAt: '2020-05-13T01:00:00+01:00',
+        },
+        {
+          id: '5', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-1, 135] } }, category: 'Wildfire', updatedAt: '2012-07-04T01:00:00+01:00',
+        },
+        {
+          id: '6', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [1, 100] } }, category: 'Wildfire', updatedAt: '2012-07-14T01:00:00+01:00',
+        },
+        {
+          id: '7', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [3, 95] } }, category: 'Wildfire', updatedAt: '2012-07-14T01:00:00+01:00',
+        },
+        {
+          id: '8', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [2, 97] } }, category: 'Wildfire', updatedAt: '2012-07-14T01:00:00+01:00',
+        },
+        {
+          id: '9', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [0, 120] } }, category: 'Landslide', updatedAt: '2012-07-14T01:00:00+01:00',
+        },
+        {
+          id: '10', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [1, 110] } }, category: 'Landslide', updatedAt: '2012-07-14T01:00:00+01:00',
+        },
+        {
+          id: '11', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [2, 127] } }, category: 'Volcano', updatedAt: '2012-07-14T01:00:00+01:00',
+        },
       ],
       fundraisings: [
         {

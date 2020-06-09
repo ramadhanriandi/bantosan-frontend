@@ -59,14 +59,22 @@ export default {
   height: 41px;
 }
 
-.btn-small, .btn-small:hover {
-  background: $LIGHT_PURPLE;
+.btn-small-red, .btn-small-red:hover, .btn-small-purple, .btn-small-purple:hover {
   border: none;
   border-radius: 7px;
-  color: $PURPLE;
   font-size: 10px;
   font-weight: 700;
   height: 28px;
+}
+
+.btn-small-red, .btn-small-red:hover {
+  background: $LIGHT_RED;
+  color: $RED;
+}
+
+.btn-small-purple, .btn-small-purple:hover {
+  background: $LIGHT_PURPLE;
+  color: $PURPLE;
 }
 
 .footer-note, .subtitle {
