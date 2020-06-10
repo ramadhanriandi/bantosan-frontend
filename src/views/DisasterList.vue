@@ -14,6 +14,7 @@
               type="text"
               class="form-control p-3"
               placeholder="Search"
+              v-model="searchName"
             />
           </div>
           <router-link class="ml-3 d-flex align-items-center" to="/fundraisings">
@@ -33,7 +34,7 @@
               <th scope="col">Category</th>
             </tr>
           </thead>
-          <tbody v-for="disaster in getDisasters" :key="disaster.id">
+          <tbody v-for="disaster in getDisasters.data" :key="disaster.id">
             <tr>
               <td>{{ getReportedDate(disaster.createdAt) }}</td>
               <td>{{ disaster.name }}</td>
@@ -44,8 +45,8 @@
         </table>
         <div class="d-flex justify-content-between">
           <div class="text-left">
-            Showing {{ getDisasters.length }}
-            / {{ disasters.length }} result{{ disasters.length > 1 ? 's' : '' }}
+            Showing {{ getDisasters.data.length }}
+            / {{ getDisasters.count }} result{{ getDisasters.count > 1 ? 's' : '' }}
           </div>
           <v-pagination v-model="page" :page-count="getMaxPage"></v-pagination>
         </div>
@@ -57,15 +58,27 @@
 
 <script>
 import utils from '@/assets/js/utils';
+import _ from 'lodash';
 import vPagination from 'vue-plain-pagination';
 
 export default {
   components: { vPagination },
   computed: {
     getDisasters() {
+      const filteredDisasters = this.searchName === ''
+        ? this.disasters
+        : _.filter(this.disasters, (disaster) => {
+          const result = disaster.name.match(new RegExp(this.searchName, 'i'));
+
+          return result && result.length > 0;
+        });
       const firstBound = this.limit * (this.page - 1);
       const lastBound = firstBound + this.limit;
-      return this.disasters.slice(firstBound, lastBound);
+
+      return {
+        count: filteredDisasters.length,
+        data: filteredDisasters.slice(firstBound, lastBound),
+      };
     },
     getLatestUpdate() {
       const latest = new Date(Math.max.apply(null, this.disasters.map(e => new Date(e.updatedAt))));
@@ -73,7 +86,7 @@ export default {
       return utils.convertDate(latest);
     },
     getMaxPage() {
-      return Math.ceil(this.disasters.length / this.limit);
+      return Math.ceil(this.getDisasters.count / this.limit);
     },
   },
   data() {
@@ -81,7 +94,7 @@ export default {
       disasters: [
         {
           id: '1',
-          name: 'Banjir Buahbatu',
+          name: 'Banjir A',
           location: {
             name: 'Kec. Buahbatu, Bandung',
             map: { coordinates: [-10, 125] },
@@ -220,6 +233,7 @@ export default {
         },
       ],
       limit: 10,
+      searchName: '',
       page: 1,
     };
   },
