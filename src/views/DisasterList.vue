@@ -33,7 +33,7 @@
               <th scope="col">Category</th>
             </tr>
           </thead>
-          <tbody v-for="disaster in disasters" :key="disaster.id">
+          <tbody v-for="disaster in getDisasters" :key="disaster.id">
             <tr>
               <td>{{ getReportedDate(disaster.createdAt) }}</td>
               <td>{{ disaster.name }}</td>
@@ -44,37 +44,10 @@
         </table>
         <div class="d-flex justify-content-between">
           <div class="text-left">
-            Showing {{ disasters.length > 10 ? '10' : disasters.length }}
+            Showing {{ getDisasters.length }}
             / {{ disasters.length }} result{{ disasters.length > 1 ? 's' : '' }}
-            in page {{ page }}
           </div>
-          <nav>
-            <ul class="pagination justify-content-end">
-              <li :class="`page-item ${page === 1 ? 'disabled' : ''}`">
-                <div
-                  class="page-link"
-                  aria-label="Previous"
-                  @click="page > 1 && setPage('previous')"
-                >
-                  <span aria-hidden="true">&laquo;</span>
-                  <span class="sr-only">Previous</span>
-                </div>
-              </li>
-              <li class="page-item active"><div class="page-link">1</div></li>
-              <li class="page-item"><div class="page-link">2</div></li>
-              <li class="page-item"><div class="page-link">3</div></li>
-              <li :class="`page-item ${page === getMaxPage ? 'disabled' : ''}`">
-                <div
-                  class="page-link"
-                  aria-label="Next"
-                  @click="page < getMaxPage && setPage('next')"
-                >
-                  <span aria-hidden="true">&raquo;</span>
-                  <span class="sr-only">Next</span>
-                </div>
-              </li>
-            </ul>
-          </nav>
+          <v-pagination v-model="page" :page-count="getMaxPage"></v-pagination>
         </div>
       </div>
     </div>
@@ -84,53 +57,166 @@
 
 <script>
 import utils from '@/assets/js/utils';
+import vPagination from 'vue-plain-pagination';
 
 export default {
+  components: { vPagination },
   computed: {
+    getDisasters() {
+      const firstBound = this.limit * (this.page - 1);
+      const lastBound = firstBound + this.limit;
+      return this.disasters.slice(firstBound, lastBound);
+    },
     getLatestUpdate() {
       const latest = new Date(Math.max.apply(null, this.disasters.map(e => new Date(e.updatedAt))));
 
       return utils.convertDate(latest);
     },
     getMaxPage() {
-      return Math.ceil(this.disasters / this.limit);
+      return Math.ceil(this.disasters.length / this.limit);
     },
   },
   data() {
     return {
       disasters: [
         {
-          id: '1', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-10, 125] } }, category: 'Flood', createdAt: '2012-07-14T01:00:00+01:00', updatedAt: '2012-07-14T01:00:00+01:00',
+          id: '1',
+          name: 'Banjir Buahbatu',
+          location: {
+            name: 'Kec. Buahbatu, Bandung',
+            map: { coordinates: [-10, 125] },
+          },
+          category: 'Flood',
+          createdAt: '2012-07-14T01:00:00+01:00',
+          updatedAt: '2012-07-14T01:00:00+01:00',
         },
         {
-          id: '2', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-9, 120] } }, category: 'Flood', createdAt: '2012-07-14T01:00:00+01:00', updatedAt: '2013-07-14T01:00:00+01:00',
+          id: '2',
+          name: 'Banjir Buahbatu',
+          location: {
+            name: 'Kec. Buahbatu, Bandung',
+            map: { coordinates: [-9, 120] },
+          },
+          category: 'Flood',
+          createdAt: '2012-07-14T01:00:00+01:00',
+          updatedAt: '2013-07-14T01:00:00+01:00',
         },
         {
-          id: '3', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-8, 110] } }, category: 'Earthquake', createdAt: '2012-07-14T01:00:00+01:00', updatedAt: '2012-07-13T01:00:00+01:00',
+          id: '3',
+          name: 'Banjir Buahbatu',
+          location: {
+            name: 'Kec. Buahbatu, Bandung',
+            map: { coordinates: [-8, 110] },
+          },
+          category: 'Earthquake',
+          createdAt: '2012-07-14T01:00:00+01:00',
+          updatedAt: '2012-07-13T01:00:00+01:00',
         },
         {
-          id: '4', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-7, 115] } }, category: 'Tsunami', createdAt: '2012-07-14T01:00:00+01:00', updatedAt: '2020-05-13T01:00:00+01:00',
+          id: '4',
+          name: 'Banjir Buahbatu',
+          location: {
+            name: 'Kec. Buahbatu, Bandung',
+            map: { coordinates: [-7, 115] },
+          },
+          category: 'Tsunami',
+          createdAt: '2012-07-14T01:00:00+01:00',
+          updatedAt: '2020-05-13T01:00:00+01:00',
         },
         {
-          id: '5', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-1, 135] } }, category: 'Wildfire', createdAt: '2012-07-14T01:00:00+01:00', updatedAt: '2012-07-04T01:00:00+01:00',
+          id: '5',
+          name: 'Banjir Buahbatu',
+          location: {
+            name: 'Kec. Buahbatu, Bandung',
+            map: { coordinates: [-1, 135] },
+          },
+          category: 'Wildfire',
+          createdAt: '2012-07-14T01:00:00+01:00',
+          updatedAt: '2012-07-04T01:00:00+01:00',
         },
         {
-          id: '6', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [1, 100] } }, category: 'Wildfire', createdAt: '2012-07-14T01:00:00+01:00', updatedAt: '2012-07-14T01:00:00+01:00',
+          id: '6',
+          name: 'Banjir Buahbatu',
+          location: {
+            name: 'Kec. Buahbatu, Bandung',
+            map: { coordinates: [1, 100] },
+          },
+          category:
+           'Wildfire',
+          createdAt:
+           '2012-07-14T01:00:00+01:00',
+          updatedAt:
+           '2012-07-14T01:00:00+01:00',
         },
         {
-          id: '7', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [3, 95] } }, category: 'Wildfire', createdAt: '2012-07-14T01:00:00+01:00', updatedAt: '2012-07-14T01:00:00+01:00',
+          id: '7',
+          name: 'Banjir Buahbatu',
+          location: {
+            name: 'Kec. Buahbatu, Bandung',
+            map: { coordinates: [3, 95] },
+          },
+          category:
+           'Wildfire',
+          createdAt:
+           '2012-07-14T01:00:00+01:00',
+          updatedAt:
+           '2012-07-14T01:00:00+01:00',
         },
         {
-          id: '8', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [2, 97] } }, category: 'Wildfire', createdAt: '2012-07-14T01:00:00+01:00', updatedAt: '2012-07-14T01:00:00+01:00',
+          id: '8',
+          name: 'Banjir Buahbatu',
+          location: {
+            name: 'Kec. Buahbatu, Bandung',
+            map: { coordinates: [2, 97] },
+          },
+          category:
+           'Wildfire',
+          createdAt:
+           '2012-07-14T01:00:00+01:00',
+          updatedAt:
+           '2012-07-14T01:00:00+01:00',
         },
         {
-          id: '9', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [0, 120] } }, category: 'Landslide', createdAt: '2012-07-14T01:00:00+01:00', updatedAt: '2012-07-14T01:00:00+01:00',
+          id: '9',
+          name: 'Banjir Buahbatu',
+          location: {
+            name: 'Kec. Buahbatu, Bandung',
+            map: { coordinates: [0, 120] },
+          },
+          category:
+           'Landslide',
+          createdAt:
+           '2012-07-14T01:00:00+01:00',
+          updatedAt:
+           '2012-07-14T01:00:00+01:00',
         },
         {
-          id: '10', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [1, 110] } }, category: 'Landslide', createdAt: '2012-07-14T01:00:00+01:00', updatedAt: '2012-07-14T01:00:00+01:00',
+          id: '10',
+          name: 'Banjir Buahbatu',
+          location: {
+            name: 'Kec. Buahbatu, Bandung',
+            map: { coordinates: [1, 110] },
+          },
+          category:
+           'Landslide',
+          createdAt:
+           '2012-07-14T01:00:00+01:00',
+          updatedAt:
+           '2012-07-14T01:00:00+01:00',
         },
         {
-          id: '11', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [2, 127] } }, category: 'Volcano', createdAt: '2012-07-14T01:00:00+01:00', updatedAt: '2012-07-14T01:00:00+01:00',
+          id: '11',
+          name: 'Banjir Buahbatu',
+          location: {
+            name: 'Kec. Buahbatu, Bandung',
+            map: { coordinates: [2, 127] },
+          },
+          category:
+           'Volcano',
+          createdAt:
+           '2012-07-14T01:00:00+01:00',
+          updatedAt:
+           '2012-07-14T01:00:00+01:00',
         },
       ],
       limit: 10,
@@ -140,15 +226,6 @@ export default {
   methods: {
     getReportedDate(date) {
       return utils.convertDate(new Date(date));
-    },
-    setPage(page) {
-      if (page === 'previous') {
-        this.page -= 1;
-      } else if (page === 'next') {
-        this.page += 1;
-      } else {
-        this.page = page;
-      }
     },
   },
 };

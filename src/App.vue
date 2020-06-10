@@ -116,14 +116,30 @@ th {
   color: $RED;
 }
 
-.page-link {
+.pagination-link, .pagination-link:focus {
+  border: 1px solid $GREY;
+  border-radius: 5px;
+  background: none;
+  color: $GREY;
+  font-size: 12px;
+  font-weight: 500;
+  height: 34px;
+  width: 34px;
+  margin: 0 0 0 5px;
+  outline: none;
+}
+
+.pagination-link--active, .pagination-link--active:focus {
+  border-color: $PURPLE;
+  background: $LIGHT_PURPLE;
   color: $PURPLE;
 }
 
-.page-link:hover {
-  color: $BLACK;
-  cursor: pointer;
+.pagination-link--disable, .pagination-link--disable:focus {
+  border-color: $LIGHT_GREY;
+  color: $LIGHT_GREY;
 }
+
 
 .subtitle {
   font-size: 10px;
