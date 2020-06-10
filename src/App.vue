@@ -40,6 +40,11 @@ export default {
   text-align: center;
 }
 
+th {
+  color: $GREY;
+  font-weight: 500;
+}
+
 .border-wrapper {
   border-radius: 14px;
 }
@@ -48,18 +53,13 @@ export default {
   border: 1px solid $LIGHT_GREY;
 }
 
-.btn, .btn:hover {
-  background: $PURPLE;
-  color: $WHITE;
+.btn {
   font-size: 12px;
   font-weight: 500;
+  height: 34px;
 }
 
-.btn, .form-control {
-  height: 41px;
-}
-
-.btn-small-red, .btn-small-red:hover, .btn-small-purple, .btn-small-purple:hover {
+.btn-sm {
   border: none;
   border-radius: 7px;
   font-size: 10px;
@@ -67,14 +67,30 @@ export default {
   height: 28px;
 }
 
-.btn-small-red, .btn-small-red:hover {
+.btn-red, .btn-red:hover {
+  background: $RED;
+  color: $WHITE;
+}
+
+.btn-purple, .btn-purple:hover {
+  background: $PURPLE;
+  color: $WHITE;
+}
+
+.btn-red-reverse, .btn-red-reverse:hover {
   background: $LIGHT_RED;
   color: $RED;
 }
 
-.btn-small-purple, .btn-small-purple:hover {
+.btn-purple-reverse, .btn-purple-reverse:hover {
   background: $LIGHT_PURPLE;
   color: $PURPLE;
+}
+
+.empty-note {
+  color: $LIGHT_GREY;
+  font-size: 24px;
+  margin-top: 100px;
 }
 
 .footer-note, .subtitle {
@@ -99,6 +115,31 @@ export default {
 .form-text {
   color: $RED;
 }
+
+.pagination-link, .pagination-link:focus {
+  border: 1px solid $GREY;
+  border-radius: 5px;
+  background: none;
+  color: $GREY;
+  font-size: 12px;
+  font-weight: 500;
+  height: 34px;
+  width: 34px;
+  margin: 0 0 0 5px;
+  outline: none;
+}
+
+.pagination-link--active, .pagination-link--active:focus {
+  border-color: $PURPLE;
+  background: $LIGHT_PURPLE;
+  color: $PURPLE;
+}
+
+.pagination-link--disable, .pagination-link--disable:focus {
+  border-color: $LIGHT_GREY;
+  color: $LIGHT_GREY;
+}
+
 
 .subtitle {
   font-size: 10px;

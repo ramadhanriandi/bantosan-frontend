@@ -39,7 +39,7 @@
         {{ errors.password }}
       </small>
     </div>
-    <button class="btn my-2 w-100" type="submit">Login</button>
+    <button class="btn btn-purple my-2 w-100" type="submit">Login</button>
     <p v-if="!isAdmin" class="footer-note">
       Don't have an account ?
       <router-link class="footer-redirect" to="/register">Register here</router-link>

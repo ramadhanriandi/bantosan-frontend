@@ -10,7 +10,7 @@
     <l-control-zoom position="bottomright"></l-control-zoom>
     <l-control position="topleft" >
       <router-link to="/reported-disasters/create">
-        <button class="btn-small-red px-3">Create a disaster report</button>
+        <button class="btn-sm btn-red-reverse px-3">Create a disaster report</button>
       </router-link>
     </l-control>
     <div v-for="disaster in disasters" :key="disaster.id">

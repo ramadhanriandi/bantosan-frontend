@@ -26,7 +26,7 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="title">Help Them by Donating</h2>
         <router-link to="/fundraisings">
-          <button class="btn-small-purple px-3">Show More</button>
+          <button class="btn-sm btn-purple-reverse px-3">Show More</button>
         </router-link>
       </div>
       <div class="row">
