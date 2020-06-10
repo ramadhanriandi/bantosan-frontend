@@ -17,7 +17,7 @@
               v-model="searchName"
             />
           </div>
-          <router-link class="ml-3 d-flex align-items-center" to="/fundraisings">
+          <router-link class="ml-3 d-flex align-items-center" to="/reported-disasters/create">
             <button class="btn btn-red-reverse col px-3">Create a disaster report</button>
           </router-link>
         </div>
@@ -57,9 +57,9 @@
 </template>
 
 <script>
-import utils from '@/assets/js/utils';
 import _ from 'lodash';
 import vPagination from 'vue-plain-pagination';
+import utils from '@/assets/js/utils';
 
 export default {
   components: { vPagination },

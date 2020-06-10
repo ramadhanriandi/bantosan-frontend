@@ -40,6 +40,10 @@ export default {
   text-align: center;
 }
 
+a, a:hover {
+  text-decoration: none;
+}
+
 th {
   color: $GREY;
   font-weight: 500;
@@ -53,13 +57,13 @@ th {
   border: 1px solid $LIGHT_GREY;
 }
 
-.btn {
+.btn, .btn:hover {
   font-size: 12px;
   font-weight: 500;
   height: 34px;
 }
 
-.btn-sm {
+.btn-sm, .btn-sm:hover {
   border: none;
   border-radius: 7px;
   font-size: 10px;
