@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Navbar :user="user" />
+    <Navbar />
     <div class="container d-flex h-100 justify-content-center py-5">
       <router-view/>
     </div>
@@ -14,14 +14,6 @@ export default {
   name: 'home',
   components: {
     Navbar,
-  },
-  data() {
-    return {
-      user: {
-        username: 'your_username',
-        role: 'User',
-      },
-    };
   },
 };
 </script>
