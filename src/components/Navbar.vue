@@ -72,15 +72,17 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'Navbar',
   computed: {
     getActiveMenu() {
       return this.$route.path.split('/')[1];
     },
-    getUser() {
-      return this.$store.state.user;
-    },
+    ...mapGetters([
+      'getUser',
+    ]),
   },
   data() {
     return {

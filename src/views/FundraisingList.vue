@@ -14,7 +14,10 @@
               v-model="searchName"
             />
           </div>
-          <router-link class="ml-3 d-flex align-items-center" to="/your-fundraising/create">
+          <router-link
+            class="ml-3 d-flex align-items-center"
+            :to="getUser && getUser.username ? '/your-fundraising/create' : '/login'"
+          >
             <button class="btn btn-purple-reverse col px-3">Create a fundraising</button>
           </router-link>
         </div>
@@ -37,6 +40,7 @@
 
 <script>
 import _ from 'lodash';
+import { mapGetters } from 'vuex';
 import CardItem from '@/components/CardItem.vue';
 
 export default {
@@ -55,6 +59,9 @@ export default {
 
       return filteredFundraisings;
     },
+    ...mapGetters([
+      'getUser',
+    ]),
   },
   data() {
     return {

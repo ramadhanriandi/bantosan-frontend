@@ -29,6 +29,11 @@ const routes = [
     name: 'fundraisings',
     component: () => import('../views/FundraisingList.vue'),
   },
+  // {
+  //   path: '/fundraisings/:id',
+  //   name: 'fundraisingDetail',
+  //   component: () => import('../views/FundraisingDetail.vue'),
+  // },
   {
     path: '/login',
     name: 'login',

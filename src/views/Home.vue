@@ -41,7 +41,10 @@
     </div>
     <p class="question mt-5">
       Want to raise a fund ?
-      <router-link class="question-redirect" to="/your-fundraising/create">
+      <router-link
+        class="question-redirect"
+        :to="getUser && getUser.username ? '/your-fundraising/create' : '/login'"
+      >
         Create it now
       </router-link>
     </p>
@@ -50,6 +53,7 @@
 
 <script>
 import _ from 'lodash';
+import { mapGetters } from 'vuex';
 import utils from '@/assets/js/utils';
 import CardItem from '@/components/CardItem.vue';
 import DisasterMap from '@/components/DisasterMap.vue';
@@ -78,6 +82,9 @@ export default {
 
       return counters;
     },
+    ...mapGetters([
+      'getUser',
+    ]),
   },
   data() {
     return {
