@@ -40,8 +40,8 @@ const routes = [
     component: () => import('../views/FundraisingDetail.vue'),
   },
   {
-    path: '/reported-disaster',
-    name: 'reportedDisaster',
+    path: '/reported-disasters',
+    name: 'reportedDisasters',
     component: () => import('../views/DisasterDashboard.vue'),
   },
   {

@@ -7,7 +7,24 @@
           List of reported disasters and their current status
         </p>
       </div>
-      <div class="col-12 col-sm-12 col-lg-6">
+      <div
+        class="col-12 col-sm-12 col-lg-6 d-flex justify-content-end"
+        v-if="getUser && getUser.role === 'Admin'"
+      >
+        <div
+          v-for="data in statuses"
+          :key="data.name"
+          @click="setStatus(data.name)"
+          :class="{ 'filter-active': status === data.name }"
+          class="filter d-flex align-items-center ml-2 px-3"
+        >
+          {{ data.name }}
+        </div>
+      </div>
+      <div
+        class="col-12 col-sm-12 col-lg-6"
+        v-else-if="getUser && getUser.role === 'User'"
+      >
         <div class="row px-3 d-flex justify-content-end">
           <router-link
             class="ml-3 d-flex align-items-center"
@@ -27,6 +44,8 @@
               <th scope="col">Name</th>
               <th scope="col">Location</th>
               <th scope="col">Category</th>
+              <th scope="col" v-if="getUser && getUser.role === 'Admin'">Username</th>
+              <th scope="col" v-if="getUser && getUser.role === 'Admin'">Display</th>
               <th scope="col">Status</th>
               <th scope="col">Action</th>
             </tr>
@@ -37,6 +56,26 @@
               <td>{{ disaster.name }}</td>
               <td>{{ disaster.location.name }}</td>
               <td>{{ disaster.category }}</td>
+              <td v-if="getUser && getUser.role === 'Admin'">{{ disaster.createdBy.username }}</td>
+              <td v-if="getUser && getUser.role === 'Admin'">
+                <div
+                  v-if="disaster.status === 'Verified'"
+                  class="btn-xs d-inline p-2 mr-1"
+                  :class="`btn-${getDisplayColor(disaster.display, 'Show')}-reverse
+                  btn-${getDisplayColor(disaster.display, 'Show')}-outline`"
+                >
+                  Show
+                </div>
+                <div
+                  v-if="disaster.status === 'Verified'"
+                  class="btn-xs d-inline p-2"
+                  :class="`btn-${getDisplayColor(disaster.display, 'Hidden')}-reverse
+                  btn-${getDisplayColor(disaster.display, 'Hidden')}-outline`"
+                >
+                  Hidden
+                </div>
+                <div v-if="disaster.status !== 'Verified'">-</div>
+              </td>
               <td>
                 <div :class="`btn-xs btn-${getColor(disaster.status)} d-inline py-2 px-3`">
                   {{ disaster.status }}
@@ -50,6 +89,7 @@
                   <img src="@/assets/img/view.png" />
                 </div>
                 <div
+                  v-if="getUser && getUser.role === 'User'"
                   class="btn-xs cursor-pointer d-inline p-2 mr-1"
                   :class="disaster.status === 'Pending' ? 'btn-purple' : 'btn-light-grey'"
                   @click="handleRedirect('edit', disaster)"
@@ -57,23 +97,26 @@
                   <img src="@/assets/img/edit.png" />
                 </div>
                 <div
-                  class="btn-xs cursor-pointer d-inline p-2 mr-1"
+                  v-if="getUser && getUser.role === 'User'"
+                  class="btn-xs cursor-pointer d-inline p-2"
                   :class="disaster.status === 'Verified' ? 'btn-light-grey' : 'btn-purple'"
                 >
                   <img src="@/assets/img/delete.png" />
                 </div>
-                <!-- <div
+                <div
+                  v-if="getUser && getUser.role === 'Admin'"
                   class="btn-xs cursor-pointer d-inline p-2 mr-1"
                   :class="disaster.status === 'Verified' ? 'btn-light-grey' : 'btn-green'"
                 >
                   <img src="@/assets/img/verify.png" />
                 </div>
                 <div
+                  v-if="getUser && getUser.role === 'Admin'"
                   class="btn-xs cursor-pointer d-inline p-2"
                   :class="disaster.status === 'Rejected' ? 'btn-light-grey' : 'btn-red'"
                 >
                   <img src="@/assets/img/unverify.png" />
-                </div> -->
+                </div>
               </td>
             </tr>
           </tbody>
@@ -87,7 +130,7 @@
         </div>
       </div>
     </div>
-    <div v-else class="empty-note">No current disaster</div>
+    <div v-else class="empty-note">Empty report</div>
   </div>
 </template>
 
@@ -101,13 +144,9 @@ export default {
   components: { vPagination },
   computed: {
     getDisasters() {
-      const filteredDisasters = this.searchName === ''
+      const filteredDisasters = this.status === 'All Report'
         ? this.disasters
-        : _.filter(this.disasters, (disaster) => {
-          const result = disaster.name.match(new RegExp(this.searchName, 'i'));
-
-          return result && result.length > 0;
-        });
+        : _.filter(this.disasters, disaster => disaster.status === this.status);
       const firstBound = this.limit * (this.page - 1);
       const lastBound = firstBound + this.limit;
 
@@ -115,11 +154,6 @@ export default {
         count: filteredDisasters.length,
         data: filteredDisasters.slice(firstBound, lastBound),
       };
-    },
-    getLatestUpdate() {
-      const latest = new Date(Math.max.apply(null, this.disasters.map(e => new Date(e.updatedAt))));
-
-      return utils.convertDate(latest);
     },
     getMaxPage() {
       return Math.ceil(this.getDisasters.count / this.limit);
@@ -139,8 +173,13 @@ export default {
             map: { coordinates: [-10, 125] },
           },
           status: 'Verified',
+          display: 'Show',
           category: 'Flood',
           createdAt: '2012-07-14T01:00:00+01:00',
+          createdBy: {
+            id: 'asdasfasfqwafw2',
+            username: 'your_username',
+          },
           updatedAt: '2012-07-14T01:00:00+01:00',
         },
         {
@@ -151,8 +190,13 @@ export default {
             map: { coordinates: [-9, 120] },
           },
           status: 'Pending',
+          display: 'Hidden',
           category: 'Flood',
           createdAt: '2012-07-14T01:00:00+01:00',
+          createdBy: {
+            id: 'asdasfasfqwafw2',
+            username: 'your_username',
+          },
           updatedAt: '2013-07-14T01:00:00+01:00',
         },
         {
@@ -163,8 +207,13 @@ export default {
             map: { coordinates: [-8, 110] },
           },
           status: 'Pending',
+          display: 'Hidden',
           category: 'Earthquake',
           createdAt: '2012-07-14T01:00:00+01:00',
+          createdBy: {
+            id: 'asdasfasfqwafw2',
+            username: 'your_username',
+          },
           updatedAt: '2012-07-13T01:00:00+01:00',
         },
         {
@@ -175,8 +224,13 @@ export default {
             map: { coordinates: [-7, 115] },
           },
           status: 'Verified',
+          display: 'Hidden',
           category: 'Tsunami',
           createdAt: '2012-07-14T01:00:00+01:00',
+          createdBy: {
+            id: 'asdasfasfqwafw2',
+            username: 'your_username',
+          },
           updatedAt: '2020-05-13T01:00:00+01:00',
         },
         {
@@ -187,8 +241,13 @@ export default {
             map: { coordinates: [-1, 135] },
           },
           status: 'Verified',
+          display: 'Show',
           category: 'Wildfire',
           createdAt: '2012-07-14T01:00:00+01:00',
+          createdBy: {
+            id: 'asdasfasfqwafw2',
+            username: 'your_username',
+          },
           updatedAt: '2012-07-04T01:00:00+01:00',
         },
         {
@@ -199,10 +258,15 @@ export default {
             map: { coordinates: [1, 100] },
           },
           status: 'Pending',
+          display: 'Show',
           category:
            'Wildfire',
           createdAt:
            '2012-07-14T01:00:00+01:00',
+          createdBy: {
+            id: 'asdasfasfqwafw2',
+            username: 'your_username',
+          },
           updatedAt:
            '2012-07-14T01:00:00+01:00',
         },
@@ -214,10 +278,15 @@ export default {
             map: { coordinates: [3, 95] },
           },
           status: 'Rejected',
+          display: 'Show',
           category:
            'Wildfire',
           createdAt:
            '2012-07-14T01:00:00+01:00',
+          createdBy: {
+            id: 'asdasfasfqwafw2',
+            username: 'your_username',
+          },
           updatedAt:
            '2012-07-14T01:00:00+01:00',
         },
@@ -229,10 +298,15 @@ export default {
             map: { coordinates: [2, 97] },
           },
           status: 'Rejected',
+          display: 'Show',
           category:
            'Wildfire',
           createdAt:
            '2012-07-14T01:00:00+01:00',
+          createdBy: {
+            id: 'asdasfasfqwafw2',
+            username: 'your_username',
+          },
           updatedAt:
            '2012-07-14T01:00:00+01:00',
         },
@@ -244,10 +318,15 @@ export default {
             map: { coordinates: [0, 120] },
           },
           status: 'Rejected',
+          display: 'Show',
           category:
            'Landslide',
           createdAt:
            '2012-07-14T01:00:00+01:00',
+          createdBy: {
+            id: 'asdasfasfqwafw2',
+            username: 'your_username',
+          },
           updatedAt:
            '2012-07-14T01:00:00+01:00',
         },
@@ -259,10 +338,15 @@ export default {
             map: { coordinates: [1, 110] },
           },
           status: 'Rejected',
+          display: 'Show',
           category:
            'Landslide',
           createdAt:
            '2012-07-14T01:00:00+01:00',
+          createdBy: {
+            id: 'asdasfasfqwafw2',
+            username: 'your_username',
+          },
           updatedAt:
            '2012-07-14T01:00:00+01:00',
         },
@@ -274,10 +358,15 @@ export default {
             map: { coordinates: [2, 127] },
           },
           status: 'Pending',
+          display: 'Show',
           category:
            'Volcano',
           createdAt:
            '2012-07-14T01:00:00+01:00',
+          createdBy: {
+            id: 'asdasfasfqwafw2',
+            username: 'your_username',
+          },
           updatedAt:
            '2012-07-14T01:00:00+01:00',
         },
@@ -289,23 +378,29 @@ export default {
         { name: 'Rejected', color: 'red' },
       ],
       limit: 10,
-      searchName: '',
       page: 1,
+      status: 'All Report',
     };
   },
   methods: {
     getColor(status) {
       return _.find(this.statuses, { name: status }).color;
     },
+    getDisplayColor(disasterDisplay, display) {
+      return disasterDisplay === display ? 'purple' : 'grey';
+    },
     getReportedDate(date) {
       return utils.convertDate(new Date(date));
     },
     handleRedirect(method, disaster) {
       if (method === 'view') {
-        this.$router.push(`/reported-disaster/${disaster.id}`);
+        this.$router.push(`/reported-disasters/${disaster.id}`);
       } else if (method === 'edit' && disaster.status === 'Pending') {
-        this.$router.push(`/reported-disaster/${disaster.id}/edit`);
+        this.$router.push(`/reported-disasters/${disaster.id}/edit`);
       }
+    },
+    setStatus(status) {
+      this.status = status;
     },
   },
 };

@@ -89,12 +89,12 @@ export default {
       dropdown: {
         menus: {
           admin: [
-            { name: 'Reported Disaster', img: 'menu-disaster.png', link: '/reported-disaster' },
+            { name: 'Reported Disaster', img: 'menu-disaster.png', link: '/reported-disasters' },
             { name: 'Fundraising List', img: 'menu-fundraising.png', link: '/fundraising-list' },
             { name: 'User List', img: 'menu-user.png', link: '/user-list' },
           ],
           user: [
-            { name: 'Reported Disaster', img: 'menu-disaster.png', link: '/reported-disaster' },
+            { name: 'Reported Disaster', img: 'menu-disaster.png', link: '/reported-disasters' },
             { name: 'Your Fundraising', img: 'menu-fundraising.png', link: '/fundraising-list' },
             { name: 'Donation History', img: 'menu-donation.png', link: '/donation-history' },
           ],

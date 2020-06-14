@@ -58,7 +58,7 @@
             </span>
           </div>
           <button
-            v-if="getUser && getUser.role != 'Admin'"
+            v-if="getUser && getUser.role !== 'Admin'"
             class="btn btn-green px-3"
             @click="handleModal"
             :data-toggle="getUser && getUser.username ? 'modal' : ''"
