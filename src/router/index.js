@@ -40,6 +40,11 @@ const routes = [
     component: () => import('../views/FundraisingDetail.vue'),
   },
   {
+    path: '/reported-disaster',
+    name: 'reportedDisaster',
+    component: () => import('../views/DisasterDashboard.vue'),
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('../views/Login.vue'),

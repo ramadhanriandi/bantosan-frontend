@@ -1,17 +1,17 @@
 <template>
   <div class="w-100">
     <div class="row mb-5">
-      <div class="col-1">
+      <div class="col-12 col-sm-12 col-lg-1 mb-4 mb-sm-4 mb-lg-0 text-left">
         <router-link
           :to="getUser && getUser.username ? '/fundraising-list' : '/fundraisings'"
         >
           <img src="@/assets/img/back.png" />
         </router-link>
       </div>
-      <div class="col-4">
+      <div class="col-12 col-sm-12 col-lg-4 mb-4 mb-sm-4 mb-lg-0">
         <img class="fundraising-img w-100" :src="require(`@/assets/img/${fundraising.image}`)" />
       </div>
-      <div class="col-7 text-left">
+      <div class="col-12 col-sm-12 col-lg-7 text-left">
         <h2 class="title mb-3">{{ fundraising.title }}</h2>
         <div class="fundraising-money">
           <span class="fundraising-donation">IDR {{ getDonation }}</span>
