@@ -68,8 +68,19 @@ th {
   height: 28px;
 }
 
+.btn-xs, .btn-xs:hover {
+  border-radius: 7px;
+  font-size: 10px;
+  border: none;
+}
+
 .btn-red, .btn-red:hover {
   background: $RED;
+  color: $WHITE;
+}
+
+.btn-yellow, .btn-yellow:hover {
+  background: $YELLOW;
   color: $WHITE;
 }
 
@@ -83,6 +94,16 @@ th {
   color: $WHITE;
 }
 
+.btn-light-grey, .btn-light-grey:hover {
+  background: $LIGHT_GREY;
+  color: $WHITE;
+}
+
+.btn-grey, .btn-grey:hover {
+  background: $GREY;
+  color: $WHITE;
+}
+
 .btn-red-reverse, .btn-red-reverse:hover {
   background: $LIGHT_RED;
   color: $RED;
@@ -93,10 +114,33 @@ th {
   color: $PURPLE;
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
 .empty-note {
   color: $LIGHT_GREY;
   font-size: 24px;
   margin-top: 100px;
+}
+
+.filter {
+  border: 1px solid $GREY;
+  border-radius: 5px;
+  background: none;
+  color: $GREY;
+  font-size: 12px;
+  font-weight: 500;
+  height: 34px;
+  outline: none;
+  padding: auto;
+  cursor: pointer;
+}
+
+.filter-active {
+  border-color: $PURPLE !important;
+  background: $LIGHT_PURPLE;
+  color: $PURPLE;
 }
 
 .footer-note, .subtitle {

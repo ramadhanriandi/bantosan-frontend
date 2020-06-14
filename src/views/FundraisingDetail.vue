@@ -1,6 +1,6 @@
 <template>
   <div class="w-100">
-    <div class="row">
+    <div class="row mb-5">
       <div class="col-1">
         <router-link
           :to="getUser && getUser.username ? '/fundraising-list' : '/fundraisings'"
@@ -69,6 +69,87 @@
         </div>
       </div>
     </div>
+
+    <div class="row">
+      <div class="col-11 offset-1 pr-0">
+        <div class="d-flex align-items-center mb-4 row">
+          <div class="col-12 col-sm-12 col-lg-6">
+            <h2 class="title mb-2">Donation List</h2>
+          </div>
+          <div class="col-12 col-sm-12 col-lg-6 d-flex justify-content-end">
+            <div
+              v-for="data in statuses"
+              :key="data.name"
+              @click="setStatus(data.name)"
+              :class="{ 'filter-active': status === data.name }"
+              class="filter d-flex align-items-center ml-2 px-3"
+            >
+              {{ data.name }}
+            </div>
+          </div>
+        </div>
+        <div v-if="donations.length > 0">
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">Username</th>
+                  <th scope="col">Donation</th>
+                  <th scope="col">Proof</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody v-for="donation in getDonations.data" :key="donation.id">
+                <tr>
+                  <td>{{ convertDate(donation.createdAt) }}</td>
+                  <td>{{ donation.createdBy.username }}</td>
+                  <td>IDR {{ convertCurrency(donation.nominal) }}</td>
+                  <td>
+                    <a
+                      :href="`/fundraising-list/${fundraising.id}/${donation.proof}`"
+                      target="_blank"
+                      class="btn-xs btn-grey py-2 px-3"
+                    >
+                      View File
+                    </a>
+                  </td>
+                  <td>
+                    <div :class="`btn-xs btn-${getColor(donation.status)} d-inline py-2 px-3`">
+                      {{ donation.status }}
+                    </div>
+                  </td>
+                  <td>
+                    <div
+                      class="btn-xs cursor-pointer d-inline p-2 mr-1"
+                      :class="donation.status === 'Verified' ? 'btn-light-grey' : 'btn-green'"
+                    >
+                      <img src="@/assets/img/verify.png" />
+                    </div>
+                    <div
+                      class="btn-xs cursor-pointer d-inline p-2"
+                      :class="donation.status === 'Rejected' ? 'btn-light-grey' : 'btn-red'"
+                    >
+                      <img src="@/assets/img/unverify.png" />
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="d-flex justify-content-between">
+              <div class="text-left">
+                Showing {{ getDonations.data.length }}
+                / {{ getDonations.count }} result{{ getDonations.count > 1 ? 's' : '' }}
+              </div>
+              <v-pagination v-model="page" :page-count="getMaxPage"></v-pagination>
+            </div>
+          </div>
+        </div>
+        <div v-else class="empty-note">Empty donation</div>
+      </div>
+    </div>
+
     <div
       class="modal fade"
       id="donation-modal"
@@ -148,11 +229,13 @@
 import KProgress from 'k-progress';
 import _ from 'lodash';
 import { mapGetters } from 'vuex';
+import vPagination from 'vue-plain-pagination';
 import utils from '@/assets/js/utils';
 
 export default {
   components: {
     KProgress,
+    vPagination,
   },
   computed: {
     getDaysLeft() {
@@ -161,8 +244,23 @@ export default {
     getDonation() {
       return utils.convertCurrency(this.fundraising.totalDonation);
     },
+    getDonations() {
+      const filteredDonations = this.status === 'All Donation'
+        ? this.donations
+        : _.filter(this.donations, donation => donation.status === this.status);
+      const firstBound = this.limit * (this.page - 1);
+      const lastBound = firstBound + this.limit;
+
+      return {
+        count: filteredDonations.length,
+        data: filteredDonations.slice(firstBound, lastBound),
+      };
+    },
     getFullname() {
       return utils.cutString(this.fundraising.createdBy.fullname, 31);
+    },
+    getMaxPage() {
+      return Math.ceil(this.getDonations.count / this.limit);
     },
     getPercentage() {
       const { totalDonation, target } = this.fundraising;
@@ -216,7 +314,7 @@ export default {
         donaturs: 403,
       },
       donations: [{
-        id: 'asfaslfaslfbasldas',
+        id: 'donation1',
         nominal: 10000,
         proof: 'donation1',
         status: 'Pending',
@@ -229,10 +327,10 @@ export default {
           title: 'Bantuan Banjir Palu',
         },
       }, {
-        id: 'asfaslfaslfbasldas',
+        id: 'donation2',
         nominal: 10000,
         proof: 'donation2',
-        status: 'Pending',
+        status: 'Rejected',
         createdAt: '2020-09-14T01:00:00+01:00',
         createdBy: {
           id: 'asdasfasfqwafw2',
@@ -242,24 +340,42 @@ export default {
           title: 'Bantuan Banjir Palu',
         },
       }],
+      statuses: [
+        { name: 'All Donation', color: 'grey' },
+        { name: 'Verified', color: 'green' },
+        { name: 'Pending', color: 'yellow' },
+        { name: 'Rejected', color: 'red' },
+      ],
+      status: 'All Donation',
       errors: {},
       nominal: null,
       bankId: null,
       proof: null,
+      limit: 10,
+      page: 1,
     };
   },
   methods: {
     convertCurrency(nominal) {
       return utils.convertCurrency(nominal);
     },
+    convertDate(date) {
+      return utils.convertDate(new Date(date));
+    },
     getBankInfo(bankId) {
       const bank = _.find(this.fundraising.banks, { bankId });
       return `${bank.name} - ${bank.accountNumber} - ${bank.accountHolder}`;
+    },
+    getColor(status) {
+      return _.find(this.statuses, { name: status }).color;
     },
     handleModal() {
       if (this.getUser && !this.getUser.username) {
         this.$router.push({ name: 'login' });
       }
+    },
+    setStatus(status) {
+      this.status = status;
     },
     submitForm(e) {
       this.errors = {};
