@@ -31,8 +31,25 @@
           <div class="m-0"><span>{{ fundraising.donaturs }}</span> Donators</div>
           <div class="m-0"><span>{{ getDaysLeft }}</span> Days Left</div>
         </div>
-        <div class="fundraising-description text-justify mb-2">{{ fundraising.description }}</div>
-        <div class="d-flex justify-content-between">
+        <div class="row">
+          <div
+            class="fundraising-description text-justify mb-2"
+            :class="getUrl === 'fundraisings' ? 'col-12' : 'col-7'"
+          >
+            {{ fundraising.description }}
+          </div>
+          <div v-if="getUrl === 'fundraising-list'" class="col-5 border-wrapper p-3 h-25">
+            <div class="distribution-title">Account Distribution</div>
+            <div
+              v-for="donation in fundraising.donationByBank"
+              :key="`donation${donation.bankId}`"
+              class="bank-account pt-2 mt-2">
+              <div class="bank-total">IDR {{ convertCurrency(donation.total) }}</div>
+              <div class="bank-info">{{ getBankInfo(donation.bankId) }}</div>
+            </div>
+          </div>
+        </div>
+        <div v-if="getUrl === 'fundraisings'" class="d-flex justify-content-between">
           <div class="fundraising-user m-0">
             Organized by
             <img class="ml-1" :src="require(`@/assets/img/${fundraising.createdBy.avatar}`)" />
@@ -58,6 +75,7 @@
       tabindex="-1"
       role="dialog"
       aria-hidden="true"
+      v-if="getUrl === 'fundraisings'"
     >
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -154,6 +172,9 @@ export default {
     getTarget() {
       return utils.convertCurrency(this.fundraising.target);
     },
+    getUrl() {
+      return this.$route.path.split('/')[1];
+    },
     ...mapGetters([
       'getUser',
     ]),
@@ -185,8 +206,42 @@ export default {
           accountHolder: 'Any Name Here',
         }],
         totalDonation: 26812345000,
+        donationByBank: [{
+          bankId: 0,
+          total: 241241231,
+        }, {
+          bankId: 1,
+          total: 225124141,
+        }],
         donaturs: 403,
       },
+      donations: [{
+        id: 'asfaslfaslfbasldas',
+        nominal: 10000,
+        proof: 'donation1',
+        status: 'Pending',
+        createdAt: '2020-09-14T01:00:00+01:00',
+        createdBy: {
+          id: 'asdasfasfqwafw2',
+          username: 'your_username',
+        },
+        fundraising: {
+          title: 'Bantuan Banjir Palu',
+        },
+      }, {
+        id: 'asfaslfaslfbasldas',
+        nominal: 10000,
+        proof: 'donation2',
+        status: 'Pending',
+        createdAt: '2020-09-14T01:00:00+01:00',
+        createdBy: {
+          id: 'asdasfasfqwafw2',
+          username: 'your_username',
+        },
+        fundraising: {
+          title: 'Bantuan Banjir Palu',
+        },
+      }],
       errors: {},
       nominal: null,
       bankId: null,
@@ -194,6 +249,13 @@ export default {
     };
   },
   methods: {
+    convertCurrency(nominal) {
+      return utils.convertCurrency(nominal);
+    },
+    getBankInfo(bankId) {
+      const bank = _.find(this.fundraising.banks, { bankId });
+      return `${bank.name} - ${bank.accountNumber} - ${bank.accountHolder}`;
+    },
     handleModal() {
       if (this.getUser && !this.getUser.username) {
         this.$router.push({ name: 'login' });
@@ -220,6 +282,24 @@ export default {
 
 <style scoped lang="scss">
 @import '@/assets/scss/color.scss';
+
+.bank-account {
+  border-top: 1px solid $GREY;
+}
+
+.bank-info {
+  font-size: 10px;
+}
+
+.bank-total {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.distribution-title {
+  color: $GREY;
+  font-size: 14px;
+}
 
 .fundraising-count, .fundraising-money {
   font-size: 14px;

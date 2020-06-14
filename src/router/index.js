@@ -35,6 +35,11 @@ const routes = [
     component: () => import('../views/FundraisingDetail.vue'),
   },
   {
+    path: '/fundraising-list/:id',
+    name: 'fundraisingListDetail',
+    component: () => import('../views/FundraisingDetail.vue'),
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('../views/Login.vue'),
