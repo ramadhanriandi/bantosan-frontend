@@ -70,7 +70,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="getUrl === 'fundraising-list'">
       <div class="col-11 offset-1 pr-0">
         <div class="d-flex align-items-center mb-4 row">
           <div class="col-12 col-sm-12 col-lg-6">
@@ -96,9 +96,9 @@
                   <th scope="col">Date</th>
                   <th scope="col">Username</th>
                   <th scope="col">Donation</th>
-                  <th scope="col">Proof</th>
+                  <th scope="col" v-if="getUser && getUser.role !== 'Admin'">Proof</th>
                   <th scope="col">Status</th>
-                  <th scope="col">Action</th>
+                  <th scope="col" v-if="getUser && getUser.role !== 'Admin'">Action</th>
                 </tr>
               </thead>
               <tbody v-for="donation in getDonations.data" :key="donation.id">
@@ -106,7 +106,7 @@
                   <td>{{ convertDate(donation.createdAt) }}</td>
                   <td>{{ donation.createdBy.username }}</td>
                   <td>IDR {{ convertCurrency(donation.nominal) }}</td>
-                  <td>
+                  <td v-if="getUser && getUser.role !== 'Admin'">
                     <a
                       :href="`/fundraising-list/${fundraising.id}/${donation.proof}`"
                       target="_blank"
@@ -120,7 +120,7 @@
                       {{ donation.status }}
                     </div>
                   </td>
-                  <td>
+                  <td v-if="getUser && getUser.role !== 'Admin'">
                     <div
                       class="btn-xs cursor-pointer d-inline p-2 mr-1"
                       :class="donation.status === 'Verified' ? 'btn-light-grey' : 'btn-green'"
