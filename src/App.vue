@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Navbar :user="user" />
+    <Navbar />
     <div class="container d-flex h-100 justify-content-center py-5">
       <router-view/>
     </div>
@@ -14,14 +14,6 @@ export default {
   name: 'home',
   components: {
     Navbar,
-  },
-  data() {
-    return {
-      user: {
-        username: 'your_username',
-        role: 'User',
-      },
-    };
   },
 };
 </script>
@@ -44,9 +36,14 @@ a, a:hover {
   text-decoration: none;
 }
 
+label {
+  color: $GREY;
+}
+
 th {
   color: $GREY;
   font-weight: 500;
+  font-size: 12px;
 }
 
 .border-wrapper {
@@ -71,13 +68,39 @@ th {
   height: 28px;
 }
 
+.btn-xs, .btn-xs:hover {
+  border-radius: 7px;
+  font-size: 10px;
+  border: none;
+}
+
 .btn-red, .btn-red:hover {
   background: $RED;
   color: $WHITE;
 }
 
+.btn-yellow, .btn-yellow:hover {
+  background: $YELLOW;
+  color: $WHITE;
+}
+
+.btn-green, .btn-green:hover {
+  background: $GREEN;
+  color: $WHITE;
+}
+
 .btn-purple, .btn-purple:hover {
   background: $PURPLE;
+  color: $WHITE;
+}
+
+.btn-light-grey, .btn-light-grey:hover {
+  background: $LIGHT_GREY;
+  color: $WHITE;
+}
+
+.btn-grey, .btn-grey:hover {
+  background: $GREY;
   color: $WHITE;
 }
 
@@ -91,10 +114,33 @@ th {
   color: $PURPLE;
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
 .empty-note {
   color: $LIGHT_GREY;
   font-size: 24px;
   margin-top: 100px;
+}
+
+.filter {
+  border: 1px solid $GREY;
+  border-radius: 5px;
+  background: none;
+  color: $GREY;
+  font-size: 12px;
+  font-weight: 500;
+  height: 34px;
+  outline: none;
+  padding: auto;
+  cursor: pointer;
+}
+
+.filter-active {
+  border-color: $PURPLE !important;
+  background: $LIGHT_PURPLE;
+  color: $PURPLE;
 }
 
 .footer-note, .subtitle {
@@ -107,7 +153,11 @@ th {
   text-decoration: none;
 }
 
-.form-control {
+.form-check-label {
+  color: $BLACK;
+}
+
+.form-control, .input-group-text {
   font-size: 12px;
 }
 

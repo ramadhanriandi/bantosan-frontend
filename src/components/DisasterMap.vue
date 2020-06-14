@@ -9,7 +9,7 @@
   >
     <l-control-zoom position="bottomright"></l-control-zoom>
     <l-control position="topleft" >
-      <router-link to="/reported-disasters/create">
+      <router-link :to="getUser && getUser.username ? '/reported-disasters/create' : '/login'">
         <button class="btn-sm btn-red-reverse px-3">Create a disaster report</button>
       </router-link>
     </l-control>
@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import {
   LCircleMarker, LControl, LControlZoom, LMap, LPopup, LTileLayer,
 } from 'vue2-leaflet';
@@ -37,6 +38,11 @@ export default {
   name: 'DisasterMap',
   props: {
     disasters: Array,
+  },
+  computed: {
+    ...mapGetters([
+      'getUser',
+    ]),
   },
   components: {
     LCircleMarker,

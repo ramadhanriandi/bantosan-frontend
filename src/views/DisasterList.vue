@@ -17,7 +17,10 @@
               v-model="searchName"
             />
           </div>
-          <router-link class="ml-3 d-flex align-items-center" to="/reported-disasters/create">
+          <router-link
+            class="ml-3 d-flex align-items-center"
+            :to="getUser && getUser.username ? '/reported-disasters/create' : '/login'"
+          >
             <button class="btn btn-red-reverse col px-3">Create a disaster report</button>
           </router-link>
         </div>
@@ -58,6 +61,7 @@
 
 <script>
 import _ from 'lodash';
+import { mapGetters } from 'vuex';
 import vPagination from 'vue-plain-pagination';
 import utils from '@/assets/js/utils';
 
@@ -88,6 +92,9 @@ export default {
     getMaxPage() {
       return Math.ceil(this.getDisasters.count / this.limit);
     },
+    ...mapGetters([
+      'getUser',
+    ]),
   },
   data() {
     return {

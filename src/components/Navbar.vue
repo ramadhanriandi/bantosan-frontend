@@ -29,7 +29,7 @@
           Fundraisings
         </router-link>
       </ul>
-      <div v-if="user && user.username" class="nav-item dropdown">
+      <div v-if="getUser && getUser.username" class="nav-item dropdown">
         <div
           class="nav-link dropdown-toggle"
           id="navbarDropdown"
@@ -39,11 +39,11 @@
           aria-expanded="false"
         >
           <img class="img-avatar" src="@/assets/img/small-avatar.png" />
-          {{ user.username }}
+          {{ getUser.username }}
         </div>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
           <div class="dropdown-header">Menus</div>
-          <div v-for="menu in dropdown.menus[`${user.role.toLowerCase()}`]" :key="menu.name">
+          <div v-for="menu in dropdown.menus[`${getUser.role.toLowerCase()}`]" :key="menu.name">
             <router-link class="dropdown-item" :to="menu.link">
               <img class="img-menu" :src="require('@/assets/img/' + menu.img)" />
               {{ menu.name }}
@@ -72,15 +72,17 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'Navbar',
-  props: {
-    user: Object,
-  },
   computed: {
     getActiveMenu() {
       return this.$route.path.split('/')[1];
     },
+    ...mapGetters([
+      'getUser',
+    ]),
   },
   data() {
     return {
@@ -93,7 +95,7 @@ export default {
           ],
           user: [
             { name: 'Reported Disaster', img: 'menu-disaster.png', link: '/reported-disaster' },
-            { name: 'Your Fundraising', img: 'menu-fundraising.png', link: '/your-fundraising' },
+            { name: 'Your Fundraising', img: 'menu-fundraising.png', link: '/fundraising-list' },
             { name: 'Donation History', img: 'menu-donation.png', link: '/donation-history' },
           ],
         },
