@@ -95,7 +95,7 @@ export default {
           ],
           user: [
             { name: 'Reported Disaster', img: 'menu-disaster.png', link: '/reported-disaster' },
-            { name: 'Your Fundraising', img: 'menu-fundraising.png', link: '/your-fundraising' },
+            { name: 'Your Fundraising', img: 'menu-fundraising.png', link: '/fundraising-list' },
             { name: 'Donation History', img: 'menu-donation.png', link: '/donation-history' },
           ],
         },

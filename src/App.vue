@@ -36,9 +36,14 @@ a, a:hover {
   text-decoration: none;
 }
 
+label {
+  color: $GREY;
+}
+
 th {
   color: $GREY;
   font-weight: 500;
+  font-size: 12px;
 }
 
 .border-wrapper {
@@ -65,6 +70,11 @@ th {
 
 .btn-red, .btn-red:hover {
   background: $RED;
+  color: $WHITE;
+}
+
+.btn-green, .btn-green:hover {
+  background: $GREEN;
   color: $WHITE;
 }
 
@@ -99,7 +109,11 @@ th {
   text-decoration: none;
 }
 
-.form-control {
+.form-check-label {
+  color: $BLACK;
+}
+
+.form-control, .input-group-text {
   font-size: 12px;
 }
 

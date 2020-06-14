@@ -16,7 +16,7 @@
           </div>
           <router-link
             class="ml-3 d-flex align-items-center"
-            :to="getUser && getUser.username ? '/your-fundraising/create' : '/login'"
+            :to="getUser && getUser.username ? '/fundraising-list/create' : '/login'"
           >
             <button class="btn btn-purple-reverse col px-3">Create a fundraising</button>
           </router-link>

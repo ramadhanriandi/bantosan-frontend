@@ -43,7 +43,7 @@
       Want to raise a fund ?
       <router-link
         class="question-redirect"
-        :to="getUser && getUser.username ? '/your-fundraising/create' : '/login'"
+        :to="getUser && getUser.username ? '/fundraising-list/create' : '/login'"
       >
         Create it now
       </router-link>
