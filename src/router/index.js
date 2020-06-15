@@ -35,6 +35,11 @@ const routes = [
     component: () => import('../views/FundraisingDetail.vue'),
   },
   {
+    path: '/fundraising-list',
+    name: 'fundraisingList',
+    component: () => import('../views/FundraisingDashboard.vue'),
+  },
+  {
     path: '/fundraising-list/:id',
     name: 'fundraisingListDetail',
     component: () => import('../views/FundraisingDetail.vue'),
