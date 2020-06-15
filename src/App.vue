@@ -114,6 +114,19 @@ th {
   color: $PURPLE;
 }
 
+.btn-grey-reverse, .btn-grey-reverse:hover {
+  background: $WHITE;
+  color: $GREY;
+}
+
+.btn-purple-outline, .btn-purple-outline:hover {
+  border: 1px solid $PURPLE;
+}
+
+.btn-grey-outline, .btn-grey-outline:hover {
+  border: 1px solid $GREY;
+}
+
 .cursor-pointer {
   cursor: pointer;
 }
