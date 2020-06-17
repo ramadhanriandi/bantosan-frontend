@@ -7,7 +7,7 @@ export default new Vuex.Store({
   state: {
     user: {
       username: 'your_username',
-      role: 'User',
+      role: 'Admin',
     },
   },
   mutations: {
