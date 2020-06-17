@@ -50,19 +50,24 @@ const routes = [
     component: () => import('../views/FundraisingDetail.vue'),
   },
   {
-    path: '/reported-disasters',
-    name: 'reportedDisasters',
-    component: () => import('../views/DisasterDashboard.vue'),
-  },
-  {
     path: '/login',
     name: 'login',
     component: () => import('../views/Login.vue'),
   },
   {
+    path: '/reported-disasters',
+    name: 'reportedDisasters',
+    component: () => import('../views/DisasterDashboard.vue'),
+  },
+  {
     path: '/register',
     name: 'register',
     component: () => import('../views/Register.vue'),
+  },
+  {
+    path: '/user-list',
+    name: 'userList',
+    component: () => import('../views/UserList.vue'),
   },
 ];
 
