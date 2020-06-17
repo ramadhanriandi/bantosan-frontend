@@ -25,6 +25,11 @@ const routes = [
     component: () => import('../views/DisasterList.vue'),
   },
   {
+    path: '/donation-history',
+    name: 'donationHistory',
+    component: () => import('../views/DonationHistory.vue'),
+  },
+  {
     path: '/fundraisings',
     name: 'fundraisings',
     component: () => import('../views/FundraisingList.vue'),
