@@ -95,13 +95,15 @@ import utils from '@/assets/js/utils';
 
 export default {
   components: { Password },
-  data: () => ({
-    errors: {},
-    username: null,
-    email: null,
-    password: null,
-    confirmPassword: null,
-  }),
+  data() {
+    return {
+      errors: {},
+      username: null,
+      email: null,
+      password: null,
+      confirmPassword: null,
+    };
+  },
   methods: {
     submitForm(e) {
       this.errors = {};
