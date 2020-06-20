@@ -69,6 +69,11 @@ const routes = [
     name: 'userList',
     component: () => import('../views/UserList.vue'),
   },
+  {
+    path: '/user-list/:id',
+    name: 'userDetail',
+    component: () => import('../views/UserDetail.vue'),
+  },
 ];
 
 const router = new VueRouter({
