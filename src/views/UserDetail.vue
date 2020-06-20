@@ -1,17 +1,27 @@
 <template>
   <div class="w-100">
     <div class="row">
-      <div class="col-12 col-sm-12 col-lg-1 mb-4 mb-sm-4 mb-lg-0 text-left">
+      <div
+        v-if="getUrl === 'user-list'"
+        class="col-12 col-sm-12 col-lg-1 mb-4 mb-sm-4 mb-lg-0 text-left"
+      >
         <router-link to="/user-list"><img src="@/assets/img/back.png" /></router-link>
       </div>
-      <div class="col-12 col-sm-12 col-lg-11 mb-4 mb-sm-4 mb-lg-0">
-        <h2 class="title mb-2">User Detail</h2>
-        <p class="subtitle">Latest Update : {{ convertDate(user.updatedAt) }}</p>
+      <div
+        class="col-12 col-sm-12 col-lg-11 mb-4 "
+        :class="{ 'mb-sm-4 mb-lg-0': getUrl === 'user-list' }"
+      >
+        <h2 class="title mb-2">{{ getUrl === 'user-list' ? 'User Detail' : 'User Profile' }}</h2>
+        <p v-if="getUrl === 'user-list'" class="subtitle">
+          Latest Update : {{ convertDate(user.updatedAt) }}
+        </p>
       </div>
     </div>
-    <div class="row text-left">
-      <div class="mb-4 mb-sm-4 mb-lg-0 offset-0 offset-sm-0
-        offset-lg-1 col-12 col-sm-12 col-lg-4 d-flex">
+    <form class="row text-left" @submit="submitForm" method="post">
+      <div
+        class="mb-4 mb-sm-4 mb-lg-0 col-12 col-sm-12 col-lg-4 d-flex"
+        :class="{ 'offset-0 offset-sm-0 offset-lg-1': getUrl === 'user-list' }"
+      >
         <img
           class="mr-4 user-detail-avatar"
           :src="require(`@/assets/img/${user.avatar ? user.avatar : 'big-avatar.png'}`)"
@@ -19,36 +29,46 @@
         <div>
           <div class="user-detail-username mt-3 mb-1">{{ user.username }}</div>
           <div class="user-detail-email mb-2">{{ user.email }}</div>
-          <div :class="`user-detail-status text-${getColor(user.status)}`">{{ user.status }}</div>
+          <div
+            v-if="getUrl === 'user-list'"
+            :class="`user-detail-status text-${getColor(user.status)}`"
+          >
+            {{ user.status }}
+          </div>
+          <div v-else-if="getUser.role === 'Admin'" class="user-detail-status text-green">
+            Administrator
+          </div>
         </div>
       </div>
-      <div class="col-12 col-sm-12 col-lg-3">
+      <div :class="`col-12 col-sm-12 col-lg-${getUrl === 'user-list' ? '3' : '4'}`">
         <div class="form-group">
           <label>Username</label>
           <input
             type="text"
-            :value="user.username"
             class="form-control p-3"
+            v-model="user.username"
             :readonly="getUrl === 'user-list'"
+            required
           />
         </div>
         <div class="form-group">
           <label>Email</label>
           <input
             type="text"
-            :value="user.email"
             class="form-control p-3"
+            v-model="user.email"
             :readonly="getUrl === 'user-list'"
+            required
           />
         </div>
       </div>
-      <div class="col-12 col-sm-12 col-lg-4">
+      <div class="col-12 col-sm-12 col-lg-4 d-flex flex-column">
         <div class="form-group">
           <label>Fullname</label>
           <input
             type="text"
-            :value="user.fullname"
             class="form-control p-3"
+            v-model="user.fullname"
             :readonly="getUrl === 'user-list'"
           />
         </div>
@@ -56,18 +76,26 @@
           <label>Phone</label>
           <input
             type="text"
-            :value="user.phone"
             class="form-control p-3"
+            v-model="user.phone"
             :readonly="getUrl === 'user-list'"
           />
         </div>
+        <button
+          v-if="getUrl === 'profile'"
+          type="submit"
+          class="btn btn-purple my-2 align-self-end"
+        >
+          Save Changes
+        </button>
       </div>
-    </div>
+    </form>
   </div>
 </template>
 
 <script>
 import _ from 'lodash';
+import { mapGetters } from 'vuex';
 import utils from '@/assets/js/utils';
 
 export default {
@@ -75,6 +103,9 @@ export default {
     getUrl() {
       return this.$route.path.split('/')[1];
     },
+    ...mapGetters([
+      'getUser',
+    ]),
   },
   data() {
     return {
@@ -82,7 +113,7 @@ export default {
         id: 'asfaslfaslfbasldas1',
         username: 'your_username',
         email: 'your_email@gmail.com',
-        status: 'Verified',
+        status: 'Rejected',
         fullname: 'Full name',
         phone: '231241241',
         avatar: 'big-avatar.png',
@@ -102,6 +133,11 @@ export default {
     },
     getColor(status) {
       return _.find(this.statuses, { name: status }).color;
+    },
+    submitForm(e) {
+      e.preventDefault();
+
+      return false;
     },
   },
 };

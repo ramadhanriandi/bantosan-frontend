@@ -55,6 +55,11 @@ const routes = [
     component: () => import('../views/Login.vue'),
   },
   {
+    path: '/profile',
+    name: 'profile',
+    component: () => import('../views/UserDetail.vue'),
+  },
+  {
     path: '/reported-disasters',
     name: 'reportedDisasters',
     component: () => import('../views/DisasterDashboard.vue'),
