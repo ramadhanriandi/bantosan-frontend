@@ -26,6 +26,10 @@
           class="mr-4 user-detail-avatar"
           :src="require(`@/assets/img/${user.avatar ? user.avatar : 'big-avatar.png'}`)"
         />
+        <label for="user-avatar" v-if="getUrl === 'profile'">
+          <img class="user-profile-avatar-edit p-1" src="@/assets/img/edit-avatar.png" />
+          <input type="file" class="user-profile-avatar-edit-button" id="user-avatar" />
+        </label>
         <div>
           <div class="user-detail-username mt-3 mb-1">{{ user.username }}</div>
           <div class="user-detail-email mb-2">{{ user.email }}</div>
@@ -161,5 +165,22 @@ export default {
 
 .user-detail-username {
   font-size: 18px;
+}
+
+.user-profile-avatar-edit, .user-detail-avatar-edit:hover {
+  background: $PURPLE;
+  border-radius: 100px;
+  cursor: pointer;
+}
+
+.user-profile-avatar-edit, .user-profile-avatar-edit-button {
+  height: 22px;
+  position: absolute;
+  top: 70px;
+  left: 100px;
+}
+
+.user-profile-avatar-edit-button {
+  display: none;
 }
 </style>
