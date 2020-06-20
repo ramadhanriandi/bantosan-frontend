@@ -55,6 +55,11 @@ const routes = [
     component: () => import('../views/Login.vue'),
   },
   {
+    path: '/profile',
+    name: 'profile',
+    component: () => import('../views/UserDetail.vue'),
+  },
+  {
     path: '/reported-disasters',
     name: 'reportedDisasters',
     component: () => import('../views/DisasterDashboard.vue'),
@@ -68,6 +73,11 @@ const routes = [
     path: '/user-list',
     name: 'userList',
     component: () => import('../views/UserList.vue'),
+  },
+  {
+    path: '/user-list/:id',
+    name: 'userDetail',
+    component: () => import('../views/UserDetail.vue'),
   },
 ];
 

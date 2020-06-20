@@ -207,13 +207,28 @@ th {
   color: $LIGHT_GREY;
 }
 
-
 .subtitle {
   font-size: 10px;
 }
 
 .subtitle, .title {
   text-align: left;
+}
+
+.text-red {
+  color: $RED;
+}
+
+.text-yellow {
+  color: $YELLOW;
+}
+
+.text-green {
+  color: $GREEN;
+}
+
+.text-grey {
+  color: $GREY;
 }
 
 .title {
