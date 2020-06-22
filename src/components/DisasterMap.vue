@@ -106,7 +106,6 @@ export default {
   color: $YELLOW;
 }
 
-
 .map {
   border-radius: 26px;
   font-family: 'Rubik', sans-serif;

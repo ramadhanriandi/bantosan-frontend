@@ -5,41 +5,26 @@
         <router-link to="/reported-disasters"><img src="@/assets/img/back.png" /></router-link>
       </div>
       <div class="col-12 col-sm-12 col-lg-11 mb-4 mb-sm-4 mb-lg-0">
-        <h2 class="title mb-2">Reported Disaster</h2>
-        <p class="subtitle">Fill in the form below to report a disaster</p>
+        <h2 class="title mb-2">{{ getTitle }}</h2>
+        <p class="subtitle">{{ getSubtitle }}</p>
       </div>
     </div>
     <form class="row text-left" @submit="submitForm" method="post">
       <div class="col-12 col-sm-12 col-lg-4 offset-0 offset-sm-0 offset-lg-1">
         <div class="form-group">
           <label>Name</label>
-          <input
-            type="text"
-            class="form-control p-3"
-            v-model="disaster.name"
-            required
-          />
+          <input type="text" class="form-control p-3" v-model="disaster.name" required />
         </div>
         <div class="form-group">
           <label>Description</label>
-          <textarea
-            class="form-control p-3"
-            rows="5"
-            v-model="disaster.description"
-            required
-          >
+          <textarea class="form-control p-3" rows="5" v-model="disaster.description" required>
           </textarea>
         </div>
       </div>
       <div class="col-12 col-sm-12 col-lg-4">
         <div class="form-group">
           <label>Location</label>
-          <input
-            type="text"
-            class="form-control p-3"
-            v-model="disaster.location.name"
-            required
-          />
+          <input type="text" class="form-control p-3" v-model="disaster.location.name" required />
         </div>
         <div class="form-group">
           <label>Pin the Location</label>
@@ -53,8 +38,7 @@
             @click="setCoordinates"
           >
             <l-control-zoom position="bottomright"></l-control-zoom>
-            <l-circle-marker :lat-lng="getCoordinates" :radius="6">
-            </l-circle-marker>
+            <l-circle-marker :lat-lng="getCoordinates" :radius="6"></l-circle-marker>
             <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
           </l-map>
         </div>
@@ -75,18 +59,11 @@
         </div>
         <div class="form-group">
           <label>Evidence (News URL or other)</label>
-          <input
-            type="text"
-            class="form-control p-3"
-            v-model="disaster.evidence"
-            required
-          />
+          <input type="text" class="form-control p-3" v-model="disaster.evidence" required />
         </div>
       </div>
       <div class="col-12 d-flex justify-content-end">
-        <button type="submit" class="btn btn-purple my-2">
-          Submit
-        </button>
+        <button type="submit" class="btn btn-purple my-2">{{ getButtonText }}</button>
       </div>
     </form>
   </div>
@@ -96,12 +73,34 @@
 import {
   LCircleMarker, LControlZoom, LMap, LTileLayer,
 } from 'vue2-leaflet';
+import utils from '@/assets/js/utils';
 
 export default {
   computed: {
+    getButtonText() {
+      return this.getUrl === 'create' ? 'Submit' : 'Save Changes';
+    },
     getCoordinates() {
       return this.disaster.location.map.coordinates
         ? this.disaster.location.map.coordinates : this.defaultLocation;
+    },
+    getTitle() {
+      switch (this.getUrl) {
+        case 'create':
+          return 'Report a Disaster';
+        case 'edit':
+          return 'Edit a Disaster Report';
+        default:
+          return 'Disaster Report Detail';
+      }
+    },
+    getSubtitle() {
+      return this.getUrl === 'create'
+        ? 'Fill in the form below to report a disaster' : `Latest Update : ${this.convertDate(this.disaster.updatedAt)}`;
+    },
+    getUrl() {
+      const parsedUrl = this.$route.path.split('/');
+      return parsedUrl[parsedUrl.length - 1];
     },
   },
   components: {
@@ -140,6 +139,9 @@ export default {
     };
   },
   methods: {
+    convertDate(date) {
+      return utils.convertDate(new Date(date));
+    },
     setCoordinates(event) {
       this.disaster.location.map.coordinates = event.latlng;
     },
