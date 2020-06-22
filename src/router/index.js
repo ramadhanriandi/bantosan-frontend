@@ -45,9 +45,19 @@ const routes = [
     component: () => import('../views/FundraisingDashboard.vue'),
   },
   {
+    path: '/fundraising-list/create',
+    name: 'createFundraising',
+    component: () => import('../views/FundraisingModifier.vue'),
+  },
+  {
     path: '/fundraising-list/:id',
     name: 'fundraisingListDetail',
     component: () => import('../views/FundraisingDetail.vue'),
+  },
+  {
+    path: '/fundraising-list/:id/edit',
+    name: 'editFundraising',
+    component: () => import('../views/FundraisingModifier.vue'),
   },
   {
     path: '/login',
