@@ -65,6 +65,11 @@ const routes = [
     component: () => import('../views/DisasterDashboard.vue'),
   },
   {
+    path: '/reported-disasters/create',
+    name: 'createReportedDisasters',
+    component: () => import('../views/DisasterDetail.vue'),
+  },
+  {
     path: '/register',
     name: 'register',
     component: () => import('../views/Register.vue'),
