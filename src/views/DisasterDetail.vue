@@ -25,7 +25,7 @@
           <label>Description</label>
           <textarea
             class="form-control p-3"
-            rows="5"
+            rows="15"
             v-model="disaster.description"
             :readonly="isDetailPage"
             required
