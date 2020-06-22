@@ -13,18 +13,36 @@
       <div class="col-12 col-sm-12 col-lg-4 offset-0 offset-sm-0 offset-lg-1">
         <div class="form-group">
           <label>Name</label>
-          <input type="text" class="form-control p-3" v-model="disaster.name" required />
+          <input
+            type="text"
+            class="form-control p-3"
+            v-model="disaster.name"
+            :readonly="isDetailPage"
+            required
+          />
         </div>
         <div class="form-group">
           <label>Description</label>
-          <textarea class="form-control p-3" rows="5" v-model="disaster.description" required>
+          <textarea
+            class="form-control p-3"
+            rows="5"
+            v-model="disaster.description"
+            :readonly="isDetailPage"
+            required
+          >
           </textarea>
         </div>
       </div>
       <div class="col-12 col-sm-12 col-lg-4">
         <div class="form-group">
           <label>Location</label>
-          <input type="text" class="form-control p-3" v-model="disaster.location.name" required />
+          <input
+            type="text"
+            class="form-control p-3"
+            v-model="disaster.location.name"
+            :readonly="isDetailPage"
+            required
+          />
         </div>
         <div class="form-group">
           <label>Pin the Location</label>
@@ -46,7 +64,20 @@
       <div class="col-12 col-sm-12 col-lg-3">
         <div class="form-group">
           <label>Category</label>
-          <select type="text" class="form-control" v-model="disaster.category" required>
+          <input
+            type="text"
+            class="form-control p-3"
+            v-if="isDetailPage"
+            v-model="disaster.category"
+            :readonly="isDetailPage"
+          />
+          <select
+            type="text"
+            class="form-control"
+            v-else
+            v-model="disaster.category"
+            required
+          >
             <option
               v-for="category in categories"
               :key="category"
@@ -59,10 +90,16 @@
         </div>
         <div class="form-group">
           <label>Evidence (News URL or other)</label>
-          <input type="text" class="form-control p-3" v-model="disaster.evidence" required />
+          <input
+            type="text"
+            class="form-control p-3"
+            v-model="disaster.evidence"
+            :readonly="isDetailPage"
+            required
+          />
         </div>
       </div>
-      <div class="col-12 d-flex justify-content-end">
+      <div class="col-12 d-flex justify-content-end" v-if="!isDetailPage">
         <button type="submit" class="btn btn-purple my-2">{{ getButtonText }}</button>
       </div>
     </form>
@@ -101,6 +138,9 @@ export default {
     getUrl() {
       const parsedUrl = this.$route.path.split('/');
       return parsedUrl[parsedUrl.length - 1];
+    },
+    isDetailPage() {
+      return this.getUrl !== 'create' && this.getUrl !== 'edit';
     },
   },
   components: {
@@ -143,7 +183,9 @@ export default {
       return utils.convertDate(new Date(date));
     },
     setCoordinates(event) {
-      this.disaster.location.map.coordinates = event.latlng;
+      if (!this.isDetailPage) {
+        this.disaster.location.map.coordinates = event.latlng;
+      }
     },
     submitForm(e) {
       const {
