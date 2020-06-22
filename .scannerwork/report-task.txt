@@ -1,0 +1,6 @@
+projectKey=bantosan
+serverUrl=http://localhost:9000
+serverVersion=6.7.7.38951
+dashboardUrl=http://localhost:9000/dashboard/index/bantosan
+ceTaskId=AXJrqxNWMUbJ7Rx5gUQO
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AXJrqxNWMUbJ7Rx5gUQO
