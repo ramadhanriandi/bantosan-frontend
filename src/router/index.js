@@ -70,6 +70,11 @@ const routes = [
     component: () => import('../views/DisasterDetail.vue'),
   },
   {
+    path: '/reported-disasters/:id/edit',
+    name: 'editReportedDisasters',
+    component: () => import('../views/DisasterDetail.vue'),
+  },
+  {
     path: '/register',
     name: 'register',
     component: () => import('../views/Register.vue'),
