@@ -66,12 +66,17 @@ const routes = [
   },
   {
     path: '/reported-disasters/create',
-    name: 'createReportedDisasters',
+    name: 'createReportedDisaster',
+    component: () => import('../views/DisasterDetail.vue'),
+  },
+  {
+    path: '/reported-disasters/:id',
+    name: 'reportedDisasterDetail',
     component: () => import('../views/DisasterDetail.vue'),
   },
   {
     path: '/reported-disasters/:id/edit',
-    name: 'editReportedDisasters',
+    name: 'editReportedDisaster',
     component: () => import('../views/DisasterDetail.vue'),
   },
   {
