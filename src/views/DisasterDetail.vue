@@ -45,14 +45,15 @@
           <label>Pin the Location</label>
           <l-map
             class="map w-100"
-            :center="center"
+            :center="getCoordinates"
             :minZoom="minZoom"
             :options="{ zoomControl: false }"
             :padding="[100, 100]"
             :zoom="zoom"
+            @click="setCoordinates"
           >
             <l-control-zoom position="bottomright"></l-control-zoom>
-            <l-circle-marker :lat-lng="disaster.location.map.coordinates" :radius="6">
+            <l-circle-marker :lat-lng="getCoordinates" :radius="6">
             </l-circle-marker>
             <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
           </l-map>
@@ -97,6 +98,12 @@ import {
 } from 'vue2-leaflet';
 
 export default {
+  computed: {
+    getCoordinates() {
+      return this.disaster.location.map.coordinates
+        ? this.disaster.location.map.coordinates : this.defaultLocation;
+    },
+  },
   components: {
     LCircleMarker,
     LControlZoom,
@@ -111,7 +118,7 @@ export default {
         name: 'Banjir A',
         location: {
           name: 'Kec. Buahbatu, Bandung',
-          map: { coordinates: [-10, 125] },
+          map: { coordinates: [0, 100] },
         },
         description: 'Description',
         status: 'Verified',
@@ -126,19 +133,25 @@ export default {
         updatedAt: '2012-07-14T01:00:00+01:00',
       },
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      center: [-1.5, 110],
+      defaultLocation: [-1.5, 110],
       minZoom: 4,
       url: 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png',
       zoom: 1,
     };
   },
   methods: {
+    setCoordinates(event) {
+      this.disaster.location.map.coordinates = event.latlng;
+    },
     submitForm(e) {
       const {
         name, description, location, category, evidence,
       } = this.disaster;
 
-      if (name && description && location && category && evidence) {
+      if (name && description && category && evidence && location.name) {
+        location.map.coordinates = location.map.coordinates
+          ? location.map.coordinates : this.defaultLocation;
+
         return true;
       }
 
@@ -146,6 +159,16 @@ export default {
 
       return false;
     },
+  },
+  mounted() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const { latitude, longitude } = position.coords;
+        this.defaultLocation = [latitude, longitude];
+      });
+    } else {
+      this.defaultLocation = [-1.5, 110];
+    }
   },
 };
 </script>
