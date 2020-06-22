@@ -127,7 +127,8 @@ nav {
   font-size: 10px;
 }
 
-.dropdown-item {
+.dropdown-item, .dropdown-item:active {
+  background: none;
   font-size: 12px;
 }
 
