@@ -221,27 +221,25 @@ export default {
       'getUser',
     ]),
   },
-  data() {
-    return {
-      errors: {},
-      user: {
-        id: 'asfaslfaslfbasldas1',
-        username: 'your_username',
-        email: 'your_email@gmail.com',
-        status: 'Unverified',
-        fullname: 'Full name',
-        phone: '231241241',
-        avatar: 'big-avatar.png',
-        updatedAt: '2020-09-14T01:00:00+01:00',
-      },
-      statuses: [
-        { name: 'Verified', color: 'green', text: 'Your account has been verified' },
-        { name: 'Pending', color: 'yellow', text: 'Your verification is still waiting' },
-        { name: 'Rejected', color: 'red', text: 'Your account hasn’t been verified' },
-        { name: 'Unverified', color: 'grey', text: 'Your account hasn’t been verified' },
-      ],
-    };
-  },
+  data: () => ({
+    errors: {},
+    user: {
+      id: 'asfaslfaslfbasldas1',
+      username: 'your_username',
+      email: 'your_email@gmail.com',
+      status: 'Unverified',
+      fullname: 'Full name',
+      phone: '231241241',
+      avatar: 'big-avatar.png',
+      updatedAt: '2020-09-14T01:00:00+01:00',
+    },
+    statuses: [
+      { name: 'Verified', color: 'green', text: 'Your account has been verified' },
+      { name: 'Pending', color: 'yellow', text: 'Your verification is still waiting' },
+      { name: 'Rejected', color: 'red', text: 'Your account hasn’t been verified' },
+      { name: 'Unverified', color: 'grey', text: 'Your account hasn’t been verified' },
+    ],
+  }),
   methods: {
     convertDate(date) {
       return utils.convertDate(new Date(date));

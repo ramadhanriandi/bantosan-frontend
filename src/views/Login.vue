@@ -66,7 +66,7 @@ export default {
         this.$store.dispatch('auth/login', this.user).then(
           () => {
             this.loading = false;
-            this.$router.push('/profile');
+            this.$router.go('/profile');
           },
           (error) => {
             this.message = error.response.data.errorMessage;

@@ -103,7 +103,7 @@ export default {
   }),
   mounted() {
     if (this.loggedIn) {
-      this.$router.push('/');
+      this.$router.go('/');
     }
   },
   methods: {
@@ -132,7 +132,7 @@ export default {
               timer: 2000,
               timerProgressBar: true,
               onClose: () => {
-                this.$router.push('/login');
+                this.$router.go('/login');
               },
             });
           },
