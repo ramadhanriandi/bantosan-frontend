@@ -16,7 +16,7 @@
           </div>
           <router-link
             class="ml-3 d-flex align-items-center"
-            :to="getUser && getUser.username ? '/fundraising-list/create' : '/login'"
+            :to="loggedIn ? '/fundraising-list/create' : '/login'"
           >
             <button class="btn btn-purple-reverse col px-3">Create a fundraising</button>
           </router-link>
@@ -40,8 +40,8 @@
 
 <script>
 import _ from 'lodash';
-import { mapGetters } from 'vuex';
 import CardItem from '@/components/CardItem.vue';
+import FundraisingService from '../services/fundraising.service';
 
 export default {
   components: {
@@ -59,107 +59,34 @@ export default {
 
       return filteredFundraisings;
     },
-    ...mapGetters([
-      'getUser',
-    ]),
+    loggedIn() {
+      return this.$store.state.auth.status.loggedIn;
+    },
   },
   data() {
     return {
-      fundraisings: [
-        {
-          id: 'abcdef1',
-          title: 'Bantuan Kemanusiaan Tsunami Aceh',
-          image: 'rectangle.png',
-          target: 40000000000,
-          endDate: '2020-09-14T01:00:00+01:00',
-          createdBy: {
-            id: 'sdasfasdas',
-            username: 'dwi_handayani',
-            fullname: 'Dwi Handayani',
-          },
-          totalDonation: 26812345000,
-        },
-        {
-          id: 'abcdef2',
-          title: 'Korban Banjir Lengkeka Poso Butuh Bantuan',
-          image: 'rectangle.png',
-          target: 50000000,
-          endDate: '2020-07-07T01:00:00+01:00',
-          createdBy: {
-            id: 'sdasfasda1',
-            username: 'act_sulteng',
-            fullname: 'Aksi Cepat Tanggap Sulawesi Tengah',
-          },
-          totalDonation: 17295123,
-        },
-        {
-          id: 'abcdef3',
-          title: 'Bantu Korban Banjir Jawa Barat dan Banten',
-          image: 'rectangle.png',
-          target: 50000000,
-          endDate: '2020-08-07T01:00:00+01:00',
-          createdBy: {
-            id: 'sdasfasda2',
-            username: 'act',
-            fullname: 'Aksi Cepat Tanggap',
-          },
-          totalDonation: 20296131,
-        },
-        {
-          id: 'abcdef4',
-          title: 'Bantu Korban Bencana Indonesia',
-          image: 'rectangle.png',
-          target: 200000000,
-          endDate: '2020-11-01T01:00:00+01:00',
-          createdBy: {
-            id: 'sdasfasda3',
-            username: 'baznas',
-            fullname: 'Badan Amil Zakat Nasional',
-          },
-          totalDonation: 30158212,
-        },
-        {
-          id: 'abcdef5',
-          title: 'Korban Banjir Lengkeka Poso Butuh Bantuan',
-          image: 'rectangle.png',
-          target: 50000000,
-          endDate: '2020-07-07T01:00:00+01:00',
-          createdBy: {
-            id: 'sdasfasda1',
-            username: 'act_sulteng',
-            fullname: 'Aksi Cepat Tanggap Sulawesi Tengah',
-          },
-          totalDonation: 17295123,
-        },
-        {
-          id: 'abcdef6',
-          title: 'Bantu Korban Banjir Jawa Barat dan Banten',
-          image: 'rectangle.png',
-          target: 50000000,
-          endDate: '2020-08-07T01:00:00+01:00',
-          createdBy: {
-            id: 'sdasfasda2',
-            username: 'act',
-            fullname: 'Aksi Cepat Tanggap',
-          },
-          totalDonation: 20296131,
-        },
-        {
-          id: 'abcdef7',
-          title: 'Bantu Korban Bencana Indonesia',
-          image: 'rectangle.png',
-          target: 200000000,
-          endDate: '2020-11-01T01:00:00+01:00',
-          createdBy: {
-            id: 'sdasfasda3',
-            username: 'baznas',
-            fullname: 'Badan Amil Zakat Nasional',
-          },
-          totalDonation: 30158212,
-        },
-      ],
+      fundraisings: [],
       searchName: '',
     };
+  },
+  mounted() {
+    FundraisingService.getAllFundraisings({ status: 'Ongoing' }).then(
+      (response) => {
+        this.fundraisings = response.data.content;
+        console.log(response.data.content);
+      },
+      (error) => {
+        this.errorMessage = error.response.data.errorMessage
+              || (error.response && error.response.data)
+              || error.message
+              || error.toString();
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.errorMessage,
+        });
+      },
+    );
   },
 };
 </script>

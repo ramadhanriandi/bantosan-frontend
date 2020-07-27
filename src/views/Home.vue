@@ -122,7 +122,7 @@ export default {
       },
     );
 
-    FundraisingService.getAllFundraisings({ limit: 4, status: 'Verified' }).then(
+    FundraisingService.getAllFundraisings({ limit: 4, status: 'Ongoing' }).then(
       (response) => {
         this.fundraisings = response.data.content;
       },
