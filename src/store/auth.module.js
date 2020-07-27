@@ -12,9 +12,9 @@ const auth = {
   actions: {
     login({ commit }, user) {
       return AuthService.login(user).then(
-        (user) => {
-          commit('loginSuccess', user);
-          return Promise.resolve(user);
+        (response) => {
+          commit('loginSuccess');
+          return Promise.resolve(response.data);
         },
         (error) => {
           commit('loginFailure');

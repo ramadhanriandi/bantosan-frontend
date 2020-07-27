@@ -53,7 +53,6 @@
 
 <script>
 import _ from 'lodash';
-import { mapGetters } from 'vuex';
 import utils from '@/assets/js/utils';
 import CardItem from '@/components/CardItem.vue';
 import DisasterMap from '@/components/DisasterMap.vue';
@@ -82,9 +81,9 @@ export default {
 
       return counters;
     },
-    ...mapGetters([
-      'getUser',
-    ]),
+    getUser() {
+      return this.$store.state.auth.user;
+    },
   },
   data() {
     return {

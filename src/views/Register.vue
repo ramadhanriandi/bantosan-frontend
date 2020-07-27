@@ -4,22 +4,13 @@
     <p class="subtitle mb-4">Fill in the form below to register your account</p>
     <div class="form-group">
       <input
-        aria-describedby="usernameHelp"
-        class="form-control p-3"
-        :class="{ 'mb-4': !errors.username }"
+        class="form-control mb-4 p-3"
         name="username"
         placeholder="Username"
         type="text"
         v-model="user.username"
         required
       />
-      <small
-        v-if="errors && errors.username"
-        id="usernameHelp"
-        class="form-text text-right"
-      >
-        {{ errors.username }}
-      </small>
     </div>
     <div class="form-group">
       <input
@@ -104,25 +95,20 @@ export default {
       return this.$store.state.auth.status.loggedIn;
     },
   },
-  data() {
-    return {
-      user: new User('', '', ''),
-      submitted: false,
-      successful: false,
-      message: '',
-      confirmPassword: '',
-      errors: {},
-    };
-  },
+  data: () => ({
+    user: new User('', '', ''),
+    message: '',
+    confirmPassword: '',
+    errors: {},
+  }),
   mounted() {
     if (this.loggedIn) {
-      this.$router.push('/profile');
+      this.$router.push('/');
     }
   },
   methods: {
     handleRegister() {
       this.message = '';
-      this.submitted = true;
       this.errors = {};
 
       if (this.user.password !== this.confirmPassword) {
@@ -139,8 +125,6 @@ export default {
         this.$store.dispatch('auth/register', this.user).then(
           () => {
             this.message = 'User registration is success';
-            this.successful = true;
-
             this.$swal({
               icon: 'success',
               title: 'Success',
@@ -154,7 +138,6 @@ export default {
           },
           (error) => {
             this.message = error.response.data.errorMessage;
-            this.successful = false;
             this.$swal({
               icon: 'error',
               title: 'Oops...',

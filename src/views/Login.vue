@@ -5,40 +5,24 @@
     <div class="form-group">
       <input
         aria-describedby="usernameHelp"
-        class="form-control p-3"
-        :class="{ 'mb-4': !errors.username }"
+        class="form-control mb-4 p-3"
         name="username"
         placeholder="Username"
         type="text"
         v-model="user.username"
         required
       />
-      <small
-        class="form-text text-right"
-        id="usernameHelp"
-        v-if="errors && errors.username"
-      >
-        {{ errors.username }}
-      </small>
     </div>
     <div class="form-group">
       <input
         aria-describedby="passwordHelp"
-        class="form-control p-3"
-        :class="{ 'mb-4': !errors.password }"
+        class="form-control mb-4 p-3"
         name="password"
         placeholder="Password"
         type="password"
         v-model="user.password"
         required
       />
-      <small
-        class="form-text text-right"
-        id="passwordHelp"
-        v-if="errors && errors.password"
-      >
-        {{ errors.password }}
-      </small>
     </div>
     <button class="btn btn-purple my-2 w-100" type="submit" :disabled="loading">
       <span v-show="loading" class="spinner-border spinner-border-sm mr-2"></span>
@@ -52,7 +36,6 @@
 </template>
 
 <script>
-// import _ from 'lodash';
 import User from '../models/user';
 
 export default {
@@ -67,7 +50,7 @@ export default {
   },
   created() {
     if (this.loggedIn) {
-      this.$router.push('/profile');
+      this.$router.push('/');
     }
   },
   data: () => ({
@@ -82,35 +65,20 @@ export default {
       if (this.user.username && this.user.password) {
         this.$store.dispatch('auth/login', this.user).then(
           () => {
+            this.loading = false;
             this.$router.push('/profile');
           },
           (error) => {
-            this.loading = false;
-            this.message = (error.response && error.response.data)
-              || error.message
-              || error.toString();
+            this.message = error.response.data.errorMessage;
+            this.$swal({
+              icon: 'error',
+              title: 'Oops...',
+              text: this.message,
+            });
           },
         );
       }
     },
-    // submitForm(e) {
-    //   this.errors = {};
-
-    //   if (this.username === 'existed_username') {
-    //     this.errors.username = 'Username already exists';
-    //   }
-    //   if (this.password !== 'password') {
-    //     this.errors.password = 'Wrong password';
-    //   }
-
-    //   if (_.isEmpty(this.errors) && this.username && this.password) {
-    //     return true;
-    //   }
-
-    //   e.preventDefault();
-
-    //   return false;
-    // },
   },
 };
 </script>
