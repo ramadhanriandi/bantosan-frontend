@@ -113,8 +113,9 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const publicPages = ['/login', '/register', '/', '/admin', '/disasters', '/fundraisings'];
-  const authRequired = !publicPages.includes(to.path);
+  const publicPages = ['login', 'register', '', 'admin', 'disasters', 'fundraisings'];
+  const toPath = to.path.split('/')[1];
+  const authRequired = !publicPages.includes(toPath);
   const loggedIn = localStorage.getItem('user');
 
   if (authRequired && !loggedIn) {
