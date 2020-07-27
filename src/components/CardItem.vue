@@ -1,7 +1,7 @@
 <template>
   <router-link :to="`/fundraisings/${fundraising.id}`" class="card-link">
     <div class="card-wrapper text-left">
-      <img class="card-img" :src="require(`@/assets/img/${fundraising.image}`)" />
+      <img class="card-img" :src="require(`@/assets/img/rectangle.png`)" />
       <div class="card-body">
         <h4>{{ getTitle }}</h4>
         <div>
@@ -49,7 +49,7 @@ export default {
       return utils.convertCurrency(this.fundraising.totalDonation);
     },
     getFullname() {
-      return utils.cutString(this.fundraising.createdBy.fullname, 31);
+      return utils.cutString(this.fundraising.organizer.fullname, 31);
     },
     getPercentage() {
       const { totalDonation, target } = this.fundraising;
