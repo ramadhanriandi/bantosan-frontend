@@ -32,7 +32,7 @@
             <input type="file" class="user-profile-avatar-edit-button" id="user-avatar" />
           </label>
           <div>
-            <div class="user-detail-username mt-3 mb-1">{{ user.username }}</div>
+            <div class="user-detail-username mt-3 mb-1">{{ currentUser.username }}</div>
             <div class="user-detail-email mb-2">{{ user.email }}</div>
             <div
               v-if="getUrl === 'user-list'"
@@ -198,7 +198,11 @@ import { mapGetters } from 'vuex';
 import utils from '@/assets/js/utils';
 
 export default {
+  name: 'Profile',
   computed: {
+    currentUser() {
+      return this.$store.state.auth.user;
+    },
     getUrl() {
       return this.$route.path.split('/')[1];
     },
@@ -217,27 +221,25 @@ export default {
       'getUser',
     ]),
   },
-  data() {
-    return {
-      errors: {},
-      user: {
-        id: 'asfaslfaslfbasldas1',
-        username: 'your_username',
-        email: 'your_email@gmail.com',
-        status: 'Unverified',
-        fullname: 'Full name',
-        phone: '231241241',
-        avatar: 'big-avatar.png',
-        updatedAt: '2020-09-14T01:00:00+01:00',
-      },
-      statuses: [
-        { name: 'Verified', color: 'green', text: 'Your account has been verified' },
-        { name: 'Pending', color: 'yellow', text: 'Your verification is still waiting' },
-        { name: 'Rejected', color: 'red', text: 'Your account hasn’t been verified' },
-        { name: 'Unverified', color: 'grey', text: 'Your account hasn’t been verified' },
-      ],
-    };
-  },
+  data: () => ({
+    errors: {},
+    user: {
+      id: 'asfaslfaslfbasldas1',
+      username: 'your_username',
+      email: 'your_email@gmail.com',
+      status: 'Unverified',
+      fullname: 'Full name',
+      phone: '231241241',
+      avatar: 'big-avatar.png',
+      updatedAt: '2020-09-14T01:00:00+01:00',
+    },
+    statuses: [
+      { name: 'Verified', color: 'green', text: 'Your account has been verified' },
+      { name: 'Pending', color: 'yellow', text: 'Your verification is still waiting' },
+      { name: 'Rejected', color: 'red', text: 'Your account hasn’t been verified' },
+      { name: 'Unverified', color: 'grey', text: 'Your account hasn’t been verified' },
+    ],
+  }),
   methods: {
     convertDate(date) {
       return utils.convertDate(new Date(date));
@@ -285,6 +287,11 @@ export default {
 
       return false;
     },
+  },
+  mounted() {
+    if (!this.currentUser) {
+      this.$router.push('/login');
+    }
   },
 };
 </script>

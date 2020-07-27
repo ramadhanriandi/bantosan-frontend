@@ -29,7 +29,7 @@
           Fundraisings
         </router-link>
       </ul>
-      <div v-if="getUser && getUser.username" class="nav-item dropdown">
+      <div v-if="currentUser && currentUser.username" class="nav-item dropdown">
         <div
           class="nav-link dropdown-toggle"
           id="navbarDropdown"
@@ -39,11 +39,14 @@
           aria-expanded="false"
         >
           <img class="img-avatar" src="@/assets/img/small-avatar.png" />
-          {{ getUser.username }}
+          {{ currentUser.username }}
         </div>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
           <div class="dropdown-header">Menus</div>
-          <div v-for="menu in dropdown.menus[`${getUser.role.toLowerCase()}`]" :key="menu.name">
+          <div
+            v-for="menu in dropdown.menus[`${getDropdownMenu}`]"
+            :key="menu.name"
+          >
             <router-link class="dropdown-item" :to="menu.link">
               <img class="img-menu" :src="require('@/assets/img/' + menu.img)" />
               {{ menu.name }}
@@ -58,10 +61,10 @@
             </router-link>
           </div>
           <div class="dropdown-divider"></div>
-          <router-link class="dropdown-item" :to="dropdown.logout.link">
+          <div class="dropdown-item" @click.prevent="logOut">
             <img class="img-menu" :src="require('@/assets/img/' + dropdown.logout.img)" />
             {{ dropdown.logout.name }}
-          </router-link>
+          </div>
         </div>
       </div>
       <router-link v-else to="/login">
@@ -72,20 +75,30 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-
 export default {
   name: 'Navbar',
   computed: {
     getActiveMenu() {
       return this.$route.path.split('/')[1];
     },
-    ...mapGetters([
-      'getUser',
-    ]),
+    getCurrentUser() {
+      return this.$store.state.auth.user;
+    },
+    getDropdownMenu() {
+      return this.getCurrentUser.roles.includes('ROLE_ADMIN') ? 'admin' : 'user';
+    },
+    loggedIn() {
+      return this.$store.state.auth.status.loggedIn;
+    },
+  },
+  created() {
+    if (this.$store.state.auth.status.loggedIn) {
+      this.currentUser = this.getCurrentUser;
+    }
   },
   data() {
     return {
+      currentUser: this.$store.state.auth.user,
       dropdown: {
         menus: {
           admin: [
@@ -106,6 +119,12 @@ export default {
         logout: { name: 'Logout', img: 'menu-logout.png', link: '/login' },
       },
     };
+  },
+  methods: {
+    logOut() {
+      this.$store.dispatch('auth/logout');
+      this.$router.go('/');
+    },
   },
 };
 </script>
@@ -134,6 +153,10 @@ nav {
 
 .dropdown-item, .nav-item {
   color: $BLACK;
+}
+
+.dropdown-item:hover {
+  cursor: pointer;
 }
 
 .img-avatar {
