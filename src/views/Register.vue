@@ -137,7 +137,10 @@ export default {
             });
           },
           (error) => {
-            this.message = error.response.data.errorMessage;
+            this.message = error.response.data.errorMessage
+              || (error.response && error.response.data)
+              || error.message
+              || error.toString();
             this.$swal({
               icon: 'error',
               title: 'Oops...',

@@ -29,7 +29,7 @@
           Fundraisings
         </router-link>
       </ul>
-      <div v-if="currentUser && currentUser.username" class="nav-item dropdown">
+      <div v-if="getCurrentUser && getCurrentUser.username" class="nav-item dropdown">
         <div
           class="nav-link dropdown-toggle"
           id="navbarDropdown"
@@ -39,7 +39,7 @@
           aria-expanded="false"
         >
           <img class="img-avatar" src="@/assets/img/small-avatar.png" />
-          {{ currentUser.username }}
+          {{ getCurrentUser.username }}
         </div>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
           <div class="dropdown-header">Menus</div>
@@ -91,14 +91,8 @@ export default {
       return this.$store.state.auth.status.loggedIn;
     },
   },
-  created() {
-    if (this.$store.state.auth.status.loggedIn) {
-      this.currentUser = this.getCurrentUser;
-    }
-  },
   data() {
     return {
-      currentUser: this.$store.state.auth.user,
       dropdown: {
         menus: {
           admin: [

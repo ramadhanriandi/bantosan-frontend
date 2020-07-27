@@ -9,8 +9,10 @@
   >
     <l-control-zoom position="bottomright"></l-control-zoom>
     <l-control position="topleft" >
-      <router-link :to="getUser && getUser.username ? '/reported-disasters/create' : '/login'">
-        <button class="btn-sm btn-red-reverse px-3">Create a disaster report</button>
+      <router-link :to="loggedIn ? '/reported-disasters/create' : '/login'">
+        <button class="btn-sm btn-red-reverse px-3">
+          Create a disaster report
+        </button>
       </router-link>
     </l-control>
     <div v-for="disaster in disasters" :key="disaster.id">
@@ -29,7 +31,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import {
   LCircleMarker, LControl, LControlZoom, LMap, LPopup, LTileLayer,
 } from 'vue2-leaflet';
@@ -40,9 +41,9 @@ export default {
     disasters: Array,
   },
   computed: {
-    ...mapGetters([
-      'getUser',
-    ]),
+    loggedIn() {
+      return this.$store.state.auth.status.loggedIn;
+    },
   },
   components: {
     LCircleMarker,
@@ -52,15 +53,13 @@ export default {
     LPopup,
     LTileLayer,
   },
-  data() {
-    return {
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      center: [-1.5, 120],
-      minZoom: 4,
-      url: 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png',
-      zoom: 5,
-    };
-  },
+  data: () => ({
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    center: [-1.5, 120],
+    minZoom: 4,
+    url: 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png',
+    zoom: 5,
+  }),
 };
 </script>
 

@@ -6,9 +6,13 @@
       </div>
       <div class="col-lg-3 text-left">
         <h1 class="header">
-          <span>{{ disasters.length }}</span> Disasters <br /> in Indonesia Currently
+          <span>
+            {{ disasters ? disasters.length : '0' }}
+          </span> Disasters <br /> in Indonesia Currently
         </h1>
-        <p v-if="disasters.length > 0" class="subtitle">Latest Update : {{ getLatestUpdate }}</p>
+        <p v-if="disasters && disasters.length > 0" class="subtitle">
+          Latest Update : {{ getLatestUpdate }}
+        </p>
         <div v-for="(count, title) in getSummary" :key="title">
           <SummaryItem
             :title="title"
@@ -57,6 +61,7 @@ import utils from '@/assets/js/utils';
 import CardItem from '@/components/CardItem.vue';
 import DisasterMap from '@/components/DisasterMap.vue';
 import SummaryItem from '@/components/SummaryItem.vue';
+import DisasterService from '../services/disaster.service';
 
 export default {
   components: {
@@ -94,41 +99,7 @@ export default {
       Landslide: { foreground: 'green', background: 'light-green' },
       Volcano: { foreground: 'yellow', background: 'light-yellow' },
     },
-    disasters: [
-      {
-        id: '1', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-10, 125] } }, category: 'Flood', updatedAt: '2012-07-14T01:00:00+01:00',
-      },
-      {
-        id: '2', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-9, 120] } }, category: 'Flood', updatedAt: '2013-07-14T01:00:00+01:00',
-      },
-      {
-        id: '3', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-8, 110] } }, category: 'Earthquake', updatedAt: '2012-07-13T01:00:00+01:00',
-      },
-      {
-        id: '4', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-7, 115] } }, category: 'Tsunami', updatedAt: '2020-05-13T01:00:00+01:00',
-      },
-      {
-        id: '5', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-1, 135] } }, category: 'Wildfire', updatedAt: '2012-07-04T01:00:00+01:00',
-      },
-      {
-        id: '6', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [1, 100] } }, category: 'Wildfire', updatedAt: '2012-07-14T01:00:00+01:00',
-      },
-      {
-        id: '7', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [3, 95] } }, category: 'Wildfire', updatedAt: '2012-07-14T01:00:00+01:00',
-      },
-      {
-        id: '8', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [2, 97] } }, category: 'Wildfire', updatedAt: '2012-07-14T01:00:00+01:00',
-      },
-      {
-        id: '9', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [0, 120] } }, category: 'Landslide', updatedAt: '2012-07-14T01:00:00+01:00',
-      },
-      {
-        id: '10', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [1, 110] } }, category: 'Landslide', updatedAt: '2012-07-14T01:00:00+01:00',
-      },
-      {
-        id: '11', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [2, 127] } }, category: 'Volcano', updatedAt: '2012-07-14T01:00:00+01:00',
-      },
-    ],
+    disasters: [],
     fundraisings: [
       {
         id: 'abcdef1',
@@ -183,7 +154,26 @@ export default {
         totalDonation: 30158212,
       },
     ],
+    errorMessage: '',
   }),
+  mounted() {
+    DisasterService.getAllDisasters({ display: 'Show' }).then(
+      (response) => {
+        this.disasters = response.data.content;
+      },
+      (error) => {
+        this.errorMessage = error.response.data.errorMessage
+              || (error.response && error.response.data)
+              || error.message
+              || error.toString();
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.errorMessage,
+        });
+      },
+    );
+  },
 };
 </script>
 
