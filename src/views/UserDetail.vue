@@ -32,7 +32,7 @@
             <input type="file" class="user-profile-avatar-edit-button" id="user-avatar" />
           </label>
           <div>
-            <div class="user-detail-username mt-3 mb-1">{{ user.username }}</div>
+            <div class="user-detail-username mt-3 mb-1">{{ currentUser.username }}</div>
             <div class="user-detail-email mb-2">{{ user.email }}</div>
             <div
               v-if="getUrl === 'user-list'"
@@ -198,7 +198,11 @@ import { mapGetters } from 'vuex';
 import utils from '@/assets/js/utils';
 
 export default {
+  name: 'Profile',
   computed: {
+    currentUser() {
+      return this.$store.state.auth.user;
+    },
     getUrl() {
       return this.$route.path.split('/')[1];
     },
@@ -285,6 +289,11 @@ export default {
 
       return false;
     },
+  },
+  mounted() {
+    if (!this.currentUser) {
+      this.$router.push('/login');
+    }
   },
 };
 </script>
