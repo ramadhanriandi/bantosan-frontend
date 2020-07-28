@@ -363,7 +363,7 @@ export default {
 
         DonationService.postDonation(this.donation).then(
           () => {
-            this.message = 'User registration is success';
+            this.message = 'Your donation is success';
             this.$swal({
               icon: 'success',
               title: 'Success',

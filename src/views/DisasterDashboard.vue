@@ -9,7 +9,7 @@
       </div>
       <div
         class="col-12 col-sm-12 col-lg-6 d-flex justify-content-end"
-        v-if="getUser && getUser.role === 'Admin'"
+        v-if="isAdmin"
       >
         <div
           v-for="data in statuses"
@@ -23,7 +23,7 @@
       </div>
       <div
         class="col-12 col-sm-12 col-lg-6"
-        v-else-if="getUser && getUser.role === 'User'"
+        v-else-if="!isAdmin"
       >
         <div class="row px-3 d-flex justify-content-end">
           <router-link
@@ -44,8 +44,8 @@
               <th scope="col">Name</th>
               <th scope="col">Location</th>
               <th scope="col">Category</th>
-              <th scope="col" v-if="getUser && getUser.role === 'Admin'">Username</th>
-              <th scope="col" v-if="getUser && getUser.role === 'Admin'">Display</th>
+              <th scope="col" v-if="isAdmin">Username</th>
+              <th scope="col" v-if="isAdmin">Display</th>
               <th scope="col">Status</th>
               <th scope="col">Action</th>
             </tr>
@@ -56,8 +56,8 @@
               <td>{{ disaster.name }}</td>
               <td>{{ disaster.location.name }}</td>
               <td>{{ disaster.category }}</td>
-              <td v-if="getUser && getUser.role === 'Admin'">{{ disaster.createdBy.username }}</td>
-              <td v-if="getUser && getUser.role === 'Admin'">
+              <td v-if="isAdmin">{{ disaster.createdBy.username }}</td>
+              <td v-if="isAdmin">
                 <div
                   v-if="disaster.status === 'Verified'"
                   class="btn-xs d-inline p-2 mr-1"
@@ -89,7 +89,7 @@
                   <img src="@/assets/img/view.png" />
                 </div>
                 <div
-                  v-if="getUser && getUser.role === 'User'"
+                  v-if="!isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2 mr-1"
                   :class="disaster.status === 'Pending' ? 'btn-purple' : 'btn-light-grey'"
                   @click="handleRedirect('edit', disaster)"
@@ -97,21 +97,21 @@
                   <img src="@/assets/img/edit.png" />
                 </div>
                 <div
-                  v-if="getUser && getUser.role === 'User'"
+                  v-if="!isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2"
                   :class="disaster.status === 'Verified' ? 'btn-light-grey' : 'btn-purple'"
                 >
                   <img src="@/assets/img/delete.png" />
                 </div>
                 <div
-                  v-if="getUser && getUser.role === 'Admin'"
+                  v-if="isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2 mr-1"
                   :class="disaster.status === 'Verified' ? 'btn-light-grey' : 'btn-green'"
                 >
                   <img src="@/assets/img/verify.png" />
                 </div>
                 <div
-                  v-if="getUser && getUser.role === 'Admin'"
+                  v-if="isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2"
                   :class="disaster.status === 'Rejected' ? 'btn-light-grey' : 'btn-red'"
                 >
@@ -136,7 +136,6 @@
 
 <script>
 import _ from 'lodash';
-import { mapGetters } from 'vuex';
 import vPagination from 'vue-plain-pagination';
 import utils from '@/assets/js/utils';
 
@@ -158,9 +157,9 @@ export default {
     getMaxPage() {
       return Math.ceil(this.getDisasters.count / this.limit);
     },
-    ...mapGetters([
-      'getUser',
-    ]),
+    isAdmin() {
+      return this.currentUser && this.currentUser.roles.includes('ROLE_ADMIN');
+    },
   },
   data() {
     return {
