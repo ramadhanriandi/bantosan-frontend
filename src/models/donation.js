@@ -1,12 +1,12 @@
 export default class Donation {
   constructor(
     nominal,
+    bank,
+    donatur,
+    fundraising,
     status,
     createdAt,
     updatedAt,
-    donatur,
-    bank,
-    fundraising,
   ) {
     this.nominal = nominal;
     this.status = status;
