@@ -209,7 +209,24 @@ export default {
     },
   },
   mounted() {
-    if (navigator.geolocation) {
+    if (this.isDetailPage || this.getUrl === 'edit') {
+      DisasterService.getDisasterById(this.$route.path.split('/')[2]).then(
+        (response) => {
+          this.disaster = response.data.value;
+          this.locationName = response.data.value.location.name;
+          this.locationCoordinates = response.data.value.location.map.coordinates;
+        },
+        (error) => {
+          this.message = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.message,
+          });
+        },
+      );
+    } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         const { latitude, longitude } = position.coords;
         this.locationCoordinates = _.get(this.disaster, ['location', 'map', 'coordinates'], [latitude, longitude]);
