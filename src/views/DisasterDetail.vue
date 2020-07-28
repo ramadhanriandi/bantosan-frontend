@@ -9,7 +9,7 @@
         <p class="subtitle">{{ getSubtitle }}</p>
       </div>
     </div>
-    <form class="row text-left" @submit="submitForm" method="post">
+    <form class="row text-left" @submit.prevent="reportDisaster" method="post">
       <div class="col-12 col-sm-12 col-lg-4 offset-0 offset-sm-0 offset-lg-1">
         <div class="form-group">
           <label>Name</label>
@@ -39,7 +39,7 @@
           <input
             type="text"
             class="form-control p-3"
-            v-model="disaster.location.name"
+            v-model="locationName"
             :readonly="isDetailPage"
             required
           />
@@ -48,7 +48,7 @@
           <label>Pin the Location</label>
           <l-map
             class="map w-100"
-            :center="getCoordinates"
+            :center="locationCoordinates"
             :minZoom="minZoom"
             :options="{ zoomControl: false }"
             :padding="[100, 100]"
@@ -56,7 +56,7 @@
             @click="setCoordinates"
           >
             <l-control-zoom position="bottomright"></l-control-zoom>
-            <l-circle-marker :lat-lng="getCoordinates" :radius="6"></l-circle-marker>
+            <l-circle-marker :lat-lng="locationCoordinates" :radius="6"></l-circle-marker>
             <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
           </l-map>
         </div>
@@ -110,16 +110,21 @@
 import {
   LCircleMarker, LControlZoom, LMap, LTileLayer,
 } from 'vue2-leaflet';
+import _ from 'lodash';
 import utils from '@/assets/js/utils';
+import Disaster from '../models/disaster';
+import DisasterService from '../services/disaster.service';
 
 export default {
+  components: {
+    LCircleMarker,
+    LControlZoom,
+    LMap,
+    LTileLayer,
+  },
   computed: {
     getButtonText() {
       return this.getUrl === 'create' ? 'Submit' : 'Save Changes';
-    },
-    getCoordinates() {
-      return this.disaster.location.map.coordinates
-        ? this.disaster.location.map.coordinates : this.defaultLocation;
     },
     getTitle() {
       switch (this.getUrl) {
@@ -143,75 +148,74 @@ export default {
       return this.getUrl !== 'create' && this.getUrl !== 'edit';
     },
   },
-  components: {
-    LCircleMarker,
-    LControlZoom,
-    LMap,
-    LTileLayer,
-  },
-  data() {
-    return {
-      categories: ['Flood', 'Earthquake', 'Tsunami', 'Wildfire', 'Landslide', 'Volcano'],
-      disaster: {
-        id: '1',
-        name: 'Banjir A',
-        location: {
-          name: 'Kec. Buahbatu, Bandung',
-          map: { coordinates: [0, 100] },
-        },
-        description: 'Description',
-        status: 'Verified',
-        display: 'Show',
-        category: 'Flood',
-        evidence: 'www.google.com',
-        createdAt: '2012-07-14T01:00:00+01:00',
-        createdBy: {
-          id: 'asdasfasfqwafw2',
-          username: 'your_username',
-        },
-        updatedAt: '2012-07-14T01:00:00+01:00',
-      },
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      defaultLocation: [-1.5, 110],
-      minZoom: 4,
-      url: 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png',
-      zoom: 1,
-    };
-  },
+  data: () => ({
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    categories: ['Flood', 'Earthquake', 'Tsunami', 'Wildfire', 'Landslide', 'Volcano'],
+    disaster: new Disaster('', '', '', '', '', ''),
+    locationCoordinates: [-1.5, 110],
+    locationName: '',
+    message: '',
+    minZoom: 4,
+    url: 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png',
+    zoom: 1,
+  }),
   methods: {
     convertDate(date) {
       return utils.convertDate(new Date(date));
     },
     setCoordinates(event) {
       if (!this.isDetailPage) {
-        this.disaster.location.map.coordinates = event.latlng;
+        this.locationCoordinates = _.values(event.latlng);
       }
     },
-    submitForm(e) {
-      const {
-        name, description, location, category, evidence,
-      } = this.disaster;
+    reportDisaster() {
+      this.message = '';
+      this.disaster = {
+        ...this.disaster,
+        location: {
+          name: this.locationName,
+          map: {
+            type: 'Point',
+            coordinates: this.locationCoordinates,
+          },
+        },
+        reporter: this.$store.state.auth.user.id,
+      };
 
-      if (name && description && category && evidence && location.name) {
-        location.map.coordinates = location.map.coordinates
-          ? location.map.coordinates : this.defaultLocation;
-
-        return true;
-      }
-
-      e.preventDefault();
-
-      return false;
+      DisasterService.postDisaster(this.disaster).then(
+        () => {
+          this.message = 'Your disaster report is success';
+          this.$swal({
+            icon: 'success',
+            title: 'Success',
+            text: this.message,
+            timer: 2000,
+            timerProgressBar: true,
+            onClose: () => {
+              this.$router.push('/reported-disasters');
+            },
+          });
+        },
+        (error) => {
+          this.message = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.message,
+          });
+        },
+      );
     },
   },
   mounted() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         const { latitude, longitude } = position.coords;
-        this.defaultLocation = [latitude, longitude];
+        this.locationCoordinates = _.get(this.disaster, ['location', 'map', 'coordinates'], [latitude, longitude]);
       });
     } else {
-      this.defaultLocation = [-1.5, 110];
+      this.locationCoordinates = _.get(this.disaster, ['location', 'map', 'coordinates'], [-1.5, 110]);
     }
   },
 };
