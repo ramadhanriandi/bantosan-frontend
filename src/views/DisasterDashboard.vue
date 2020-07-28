@@ -100,6 +100,7 @@
                   v-if="!isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2"
                   :class="disaster.status === 'Verified' ? 'btn-light-grey' : 'btn-purple'"
+                  @click="deleteDisaster(disaster.id)"
                 >
                   <img src="@/assets/img/delete.png" />
                 </div>
@@ -197,6 +198,32 @@ export default {
     },
     setStatus(status) {
       this.status = status;
+    },
+    deleteDisaster(id) {
+      DisasterService.deleteDisaster(id).then(
+        () => {
+          this.message = 'The disaster report is deleted';
+          this.$swal({
+            icon: 'success',
+            title: 'Success',
+            text: this.message,
+            timer: 2000,
+            timerProgressBar: true,
+            onClose: () => {
+              this.$router.go();
+            },
+          });
+        },
+        (error) => {
+          this.message = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.message,
+          });
+        },
+      );
     },
   },
   mounted() {

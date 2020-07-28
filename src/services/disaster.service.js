@@ -25,6 +25,18 @@ class DisasterService {
     evidence: disaster.evidence,
     reporter: disaster.reporter,
   }, { headers: authHeader() })
+
+  putDisaster = (id, disaster) => axios.put(`${API_URL}/${id}`, {
+    name: disaster.name,
+    category: disaster.category,
+    description: disaster.description,
+    status: disaster.status,
+    location: disaster.location,
+    evidence: disaster.evidence,
+    display: disaster.display,
+  }, { headers: authHeader() })
+
+  deleteDisaster = id => axios.delete(`${API_URL}/${id}`, { headers: authHeader() });
 }
 
 export default new DisasterService();
