@@ -138,10 +138,14 @@
 import _ from 'lodash';
 import vPagination from 'vue-plain-pagination';
 import utils from '@/assets/js/utils';
+import DisasterService from '../services/disaster.service';
 
 export default {
   components: { vPagination },
   computed: {
+    currentUser() {
+      return this.$store.state.auth.user;
+    },
     getDisasters() {
       const filteredDisasters = this.status === 'All Report'
         ? this.disasters
@@ -161,226 +165,19 @@ export default {
       return this.currentUser && this.currentUser.roles.includes('ROLE_ADMIN');
     },
   },
-  data() {
-    return {
-      disasters: [
-        {
-          id: '1',
-          name: 'Banjir A',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-10, 125] },
-          },
-          status: 'Verified',
-          display: 'Show',
-          category: 'Flood',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt: '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '2',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-9, 120] },
-          },
-          status: 'Pending',
-          display: 'Hidden',
-          category: 'Flood',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt: '2013-07-14T01:00:00+01:00',
-        },
-        {
-          id: '3',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-8, 110] },
-          },
-          status: 'Pending',
-          display: 'Hidden',
-          category: 'Earthquake',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt: '2012-07-13T01:00:00+01:00',
-        },
-        {
-          id: '4',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-7, 115] },
-          },
-          status: 'Verified',
-          display: 'Hidden',
-          category: 'Tsunami',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt: '2020-05-13T01:00:00+01:00',
-        },
-        {
-          id: '5',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-1, 135] },
-          },
-          status: 'Verified',
-          display: 'Show',
-          category: 'Wildfire',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt: '2012-07-04T01:00:00+01:00',
-        },
-        {
-          id: '6',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [1, 100] },
-          },
-          status: 'Pending',
-          display: 'Show',
-          category:
-           'Wildfire',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '7',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [3, 95] },
-          },
-          status: 'Rejected',
-          display: 'Show',
-          category:
-           'Wildfire',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '8',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [2, 97] },
-          },
-          status: 'Rejected',
-          display: 'Show',
-          category:
-           'Wildfire',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '9',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [0, 120] },
-          },
-          status: 'Rejected',
-          display: 'Show',
-          category:
-           'Landslide',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '10',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [1, 110] },
-          },
-          status: 'Rejected',
-          display: 'Show',
-          category:
-           'Landslide',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '11',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [2, 127] },
-          },
-          status: 'Pending',
-          display: 'Show',
-          category:
-           'Volcano',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-      ],
-      statuses: [
-        { name: 'All Report', color: 'grey' },
-        { name: 'Verified', color: 'green' },
-        { name: 'Pending', color: 'yellow' },
-        { name: 'Rejected', color: 'red' },
-      ],
-      limit: 10,
-      page: 1,
-      status: 'All Report',
-    };
-  },
+  data: () => ({
+    disasters: [],
+    statuses: [
+      { name: 'All Report', color: 'grey' },
+      { name: 'Verified', color: 'green' },
+      { name: 'Pending', color: 'yellow' },
+      { name: 'Rejected', color: 'red' },
+    ],
+    limit: 10,
+    message: '',
+    page: 1,
+    status: 'All Report',
+  }),
   methods: {
     getColor(status) {
       return _.find(this.statuses, { name: status }).color;
@@ -401,6 +198,22 @@ export default {
     setStatus(status) {
       this.status = status;
     },
+  },
+  mounted() {
+    DisasterService.getAllDisasters({ userId: this.currentUser.id }).then(
+      (response) => {
+        this.disasters = response.data.content;
+      },
+      (error) => {
+        this.message = error.response.data.errorMessage
+              || error.response.data.status;
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.message,
+        });
+      },
+    );
   },
 };
 </script>

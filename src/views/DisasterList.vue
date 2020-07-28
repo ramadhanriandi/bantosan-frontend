@@ -96,15 +96,13 @@ export default {
       return this.$store.state.auth.status.loggedIn;
     },
   },
-  data() {
-    return {
-      disasters: [],
-      limit: 10,
-      searchName: '',
-      page: 1,
-      errorMessage: '',
-    };
-  },
+  data: () => ({
+    disasters: [],
+    limit: 10,
+    searchName: '',
+    page: 1,
+    message: '',
+  }),
   methods: {
     getReportedDate(date) {
       return utils.convertDate(new Date(date));
@@ -116,12 +114,12 @@ export default {
         this.disasters = response.data.content;
       },
       (error) => {
-        this.errorMessage = error.response.data.errorMessage
+        this.message = error.response.data.errorMessage
               || error.response.data.status;
         this.$swal({
           icon: 'error',
           title: 'Oops...',
-          text: this.errorMessage,
+          text: this.message,
         });
       },
     );
