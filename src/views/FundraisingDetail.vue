@@ -3,13 +3,13 @@
     <div class="row mb-5">
       <div class="col-12 col-sm-12 col-lg-1 mb-4 mb-sm-4 mb-lg-0 text-left">
         <router-link
-          :to="getUser && getUser.username ? '/fundraising-list' : '/fundraisings'"
+          :to="loggedIn ? '/fundraising-list' : '/fundraisings'"
         >
           <img src="@/assets/img/back.png" />
         </router-link>
       </div>
       <div class="col-12 col-sm-12 col-lg-4 mb-4 mb-sm-4 mb-lg-0">
-        <img class="fundraising-img w-100" :src="require(`@/assets/img/${fundraising.image}`)" />
+        <img class="fundraising-img w-100" :src="require(`@/assets/img/rectangle.png`)" />
       </div>
       <div class="col-12 col-sm-12 col-lg-7 text-left">
         <h2 class="title mb-3">{{ fundraising.title }}</h2>
@@ -24,7 +24,7 @@
           bg-color="#F4C403"
           color="#7F51DF"
           :line-height="4"
-          :percent="getPercentage"
+          :percent="fundraising.totalDonation && fundraising.target ? getPercentage : 0"
           :show-text="false"
         />
         <div class="d-flex fundraising-count justify-content-between mb-2">
@@ -52,16 +52,16 @@
         <div v-if="getUrl === 'fundraisings'" class="d-flex justify-content-between">
           <div class="fundraising-user m-0">
             Organized by
-            <img class="ml-1" :src="require(`@/assets/img/${fundraising.createdBy.avatar}`)" />
+            <img class="ml-1" :src="require(`@/assets/img/small-avatar.png`)" />
             <span class="ml-1">
               {{ getFullname }} <img class="ml-1" src="@/assets/img/verified.png" />
             </span>
           </div>
           <button
-            v-if="getUser && getUser.role !== 'Admin'"
+            v-if="!isAdmin"
             class="btn btn-green px-3"
             @click="handleModal"
-            :data-toggle="getUser && getUser.username ? 'modal' : ''"
+            :data-toggle="loggedIn ? 'modal' : ''"
             data-target="#donation-modal"
           >
             DONATE NOW
@@ -96,9 +96,9 @@
                   <th scope="col">Date</th>
                   <th scope="col">Username</th>
                   <th scope="col">Donation</th>
-                  <th scope="col" v-if="getUser && getUser.role !== 'Admin'">Proof</th>
+                  <th scope="col" v-if="!isAdmin">Proof</th>
                   <th scope="col">Status</th>
-                  <th scope="col" v-if="getUser && getUser.role !== 'Admin'">Action</th>
+                  <th scope="col" v-if="!isAdmin">Action</th>
                 </tr>
               </thead>
               <tbody v-for="donation in getDonations.data" :key="donation.id">
@@ -106,7 +106,7 @@
                   <td>{{ convertDate(donation.createdAt) }}</td>
                   <td>{{ donation.createdBy.username }}</td>
                   <td>IDR {{ convertCurrency(donation.nominal) }}</td>
-                  <td v-if="getUser && getUser.role !== 'Admin'">
+                  <td v-if="!isAdmin">
                     <a
                       :href="`/fundraising-list/${fundraising.id}/${donation.proof}`"
                       target="_blank"
@@ -120,7 +120,7 @@
                       {{ donation.status }}
                     </div>
                   </td>
-                  <td v-if="getUser && getUser.role !== 'Admin'">
+                  <td v-if="currentUser && currentUser.role !== 'Admin'">
                     <div
                       class="btn-xs cursor-pointer d-inline p-2 mr-1"
                       :class="donation.status === 'Verified' ? 'btn-light-grey' : 'btn-green'"
@@ -187,7 +187,6 @@
                   class="form-check mb-2"
                   v-for="bank in fundraising.banks"
                   :key="bank.bankId"
-                  aria-describedby="bankHelp"
                 >
                   <input
                     class="form-check-input"
@@ -201,13 +200,6 @@
                     {{ bank.name }} - {{ bank.accountNumber }} - {{ bank.accountHolder }}
                   </label>
                 </div>
-                <small
-                  v-if="errors && errors.bank"
-                  id="bankHelp"
-                  class="form-text"
-                >
-                  {{ errors.bank }}
-                </small>
               </div>
               <div class="form-group">
                 <label>Upload Transaction Proof</label>
@@ -228,9 +220,9 @@
 <script>
 import KProgress from 'k-progress';
 import _ from 'lodash';
-import { mapGetters } from 'vuex';
 import vPagination from 'vue-plain-pagination';
 import utils from '@/assets/js/utils';
+import FundraisingService from '../services/fundraising.service';
 
 export default {
   components: {
@@ -238,11 +230,14 @@ export default {
     vPagination,
   },
   computed: {
+    currentUser() {
+      return this.$store.state.auth.user;
+    },
     getDaysLeft() {
       return utils.getDaysLeft(new Date(this.fundraising.endDate));
     },
     getDonation() {
-      return utils.convertCurrency(this.fundraising.totalDonation);
+      return utils.convertCurrency(_.get(this.fundraising, 'totalDonation', 0));
     },
     getDonations() {
       const filteredDonations = this.status === 'All Donation'
@@ -257,62 +252,32 @@ export default {
       };
     },
     getFullname() {
-      return utils.cutString(this.fundraising.createdBy.fullname, 31);
+      return utils.cutString(_.get(this.fundraising, ['organizer', 'fullname'], ''), 31);
     },
     getMaxPage() {
       return Math.ceil(this.getDonations.count / this.limit);
     },
     getPercentage() {
-      const { totalDonation, target } = this.fundraising;
+      const { totalDonation = 0, target = 0 } = this.fundraising;
 
       return utils.getPercentage(totalDonation, target);
     },
     getTarget() {
-      return utils.convertCurrency(this.fundraising.target);
+      return utils.convertCurrency(this.fundraising.target ? this.fundraising.target : 0);
     },
     getUrl() {
       return this.$route.path.split('/')[1];
     },
-    ...mapGetters([
-      'getUser',
-    ]),
+    loggedIn() {
+      return this.$store.state.auth.status.loggedIn;
+    },
+    isAdmin() {
+      return this.currentUser && this.currentUser.roles.includes('ROLE_ADMIN');
+    },
   },
   data() {
     return {
-      fundraising: {
-        id: 'abcdef1',
-        title: 'Bantuan Kemanusiaan Tsunami Aceh',
-        image: 'rectangle.png',
-        description: 'Pengungsi Masih Terlunta, Ayo Bangun Lebak Kembali! Sebanyak 6 kecamatan yang meliputi 30 desa di Kabupaten Lebak terdampak banjir. Qadarullah, kejadian itu juga menyebabkan 10 orang meninggal dunia dan 67 orang luka-luka. Selain korban jiwa, sebanyak 16 sekolah juga mengalami kerusakan serta 1.253 siswa terdampak. Banjir itu juga menerjang 18 pesantren, 28 jembatan, 5 jaringan irigasi, dan hampir seribu hektar sawah warga. Dan, sebanyak 3.041 unit rumah mengalami kerusakan yang menyebabkan ribuan warga harus mengungsi karena banyak dari mereka yang rumahnya tak layak dihuni lagi.',
-        target: 40000000000,
-        endDate: '2020-09-14T01:00:00+01:00',
-        createdBy: {
-          id: 'sdasfasdas',
-          username: 'dwi_handayani',
-          fullname: 'Dwi Handayani',
-          avatar: 'small-avatar.png',
-        },
-        banks: [{
-          bankId: 0,
-          name: 'BNI',
-          accountNumber: '1241241241',
-          accountHolder: 'Any Name Here',
-        }, {
-          bankId: 1,
-          name: 'BRI',
-          accountNumber: '1241241241',
-          accountHolder: 'Any Name Here',
-        }],
-        totalDonation: 26812345000,
-        donationByBank: [{
-          bankId: 0,
-          total: 241241231,
-        }, {
-          bankId: 1,
-          total: 225124141,
-        }],
-        donaturs: 403,
-      },
+      fundraising: {},
       donations: [{
         id: 'donation1',
         nominal: 10000,
@@ -353,6 +318,7 @@ export default {
       proof: null,
       limit: 10,
       page: 1,
+      errorMessage: '',
     };
   },
   methods: {
@@ -370,8 +336,8 @@ export default {
       return _.find(this.statuses, { name: status }).color;
     },
     handleModal() {
-      if (this.getUser && !this.getUser.username) {
-        this.$router.push({ name: 'login' });
+      if (!this.loggedIn) {
+        this.$router.push('/login');
       }
     },
     setStatus(status) {
@@ -392,6 +358,24 @@ export default {
 
       return false;
     },
+  },
+  mounted() {
+    FundraisingService.getFundraisingById(this.$route.path.split('/')[2]).then(
+      (response) => {
+        this.fundraising = response.data.value;
+        console.log(response.data);
+      },
+      (error) => {
+        console.log(error.response.data);
+        this.errorMessage = error.response.data.errorMessage
+              || error.response.data.status;
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.errorMessage,
+        });
+      },
+    );
   },
 };
 </script>

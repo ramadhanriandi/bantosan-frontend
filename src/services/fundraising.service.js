@@ -16,6 +16,8 @@ class FundraisingService {
 
     return axios.get(`${API_URL}${_.size(params) > 0 ? `?${_.join(params, '&')}` : ''}`);
   }
+
+  getFundraisingById = id => axios.get(`${API_URL}/${id}`);
 }
 
 export default new FundraisingService();

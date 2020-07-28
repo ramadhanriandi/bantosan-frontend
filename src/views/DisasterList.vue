@@ -117,9 +117,7 @@ export default {
       },
       (error) => {
         this.errorMessage = error.response.data.errorMessage
-              || (error.response && error.response.data)
-              || error.message
-              || error.toString();
+              || error.response.data.status;
         this.$swal({
           icon: 'error',
           title: 'Oops...',
