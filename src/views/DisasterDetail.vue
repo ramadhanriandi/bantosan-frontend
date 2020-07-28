@@ -151,7 +151,7 @@ export default {
   data: () => ({
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     categories: ['Flood', 'Earthquake', 'Tsunami', 'Wildfire', 'Landslide', 'Volcano'],
-    disaster: new Disaster('', '', '', '', '', ''),
+    disaster: new Disaster(),
     locationCoordinates: [-1.5, 110],
     locationName: '',
     message: '',
@@ -170,42 +170,81 @@ export default {
     },
     reportDisaster() {
       this.message = '';
-      this.disaster = {
-        ...this.disaster,
-        location: {
-          name: this.locationName,
-          map: {
-            type: 'Point',
-            coordinates: this.locationCoordinates,
-          },
-        },
-        reporter: this.$store.state.auth.user.id,
-      };
 
-      DisasterService.postDisaster(this.disaster).then(
-        () => {
-          this.message = 'Your disaster report is success';
-          this.$swal({
-            icon: 'success',
-            title: 'Success',
-            text: this.message,
-            timer: 2000,
-            timerProgressBar: true,
-            onClose: () => {
-              this.$router.push('/reported-disasters');
+      if (this.getUrl === 'create') {
+        this.disaster = {
+          ...this.disaster,
+          location: {
+            name: this.locationName,
+            map: {
+              type: 'Point',
+              coordinates: this.locationCoordinates,
             },
-          });
-        },
-        (error) => {
-          this.message = error.response.data.errorMessage
+          },
+          reporter: this.$store.state.auth.user.id,
+        };
+
+        DisasterService.postDisaster(this.disaster).then(
+          () => {
+            this.message = 'Your disaster report is success';
+            this.$swal({
+              icon: 'success',
+              title: 'Success',
+              text: this.message,
+              timer: 2000,
+              timerProgressBar: true,
+              onClose: () => {
+                this.$router.push('/reported-disasters');
+              },
+            });
+          },
+          (error) => {
+            this.message = error.response.data.errorMessage
               || error.response.data.status;
-          this.$swal({
-            icon: 'error',
-            title: 'Oops...',
-            text: this.message,
-          });
-        },
-      );
+            this.$swal({
+              icon: 'error',
+              title: 'Oops...',
+              text: this.message,
+            });
+          },
+        );
+      } else if (this.getUrl === 'edit') {
+        this.disaster = {
+          ...this.disaster,
+          location: {
+            name: this.locationName,
+            map: {
+              type: 'Point',
+              coordinates: this.locationCoordinates,
+            },
+          },
+        };
+
+        DisasterService.putDisaster(this.disaster.id, this.disaster).then(
+          () => {
+            this.message = 'Your disaster report update is success';
+            this.$swal({
+              icon: 'success',
+              title: 'Success',
+              text: this.message,
+              timer: 2000,
+              timerProgressBar: true,
+              onClose: () => {
+                this.$router.push(`/reported-disasters/${this.disaster.id}`);
+              },
+            });
+          },
+          (error) => {
+            this.message = error.response.data.errorMessage
+              || error.response.data.status;
+            this.$swal({
+              icon: 'error',
+              title: 'Oops...',
+              text: this.message,
+            });
+          },
+        );
+      }
     },
   },
   mounted() {
