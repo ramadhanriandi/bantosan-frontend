@@ -70,6 +70,7 @@
       </div>
     </div>
 
+    <!-- Donation Table -->
     <div class="row" v-if="getUrl === 'fundraising-list'">
       <div class="col-11 offset-1 pr-0">
         <div class="d-flex align-items-center mb-4 row">
@@ -150,6 +151,7 @@
       </div>
     </div>
 
+    <!-- Donation Modal -->
     <div
       class="modal fade"
       id="donation-modal"
@@ -164,7 +166,7 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
-            <form class="text-left mt-3" @submit="submitForm" method="post">
+            <form class="text-left mt-3" @submit.prevent="handleDonation" method="post">
               <div class="form-group">
                 <label>Nominal</label>
                 <div class="input-group">
@@ -173,7 +175,8 @@
                   </div>
                   <input
                     type="number"
-                    v-model="nominal"
+                    v-model="donation.nominal"
+                    name="nominal"
                     class="form-control p-3"
                     placeholder="min : 10,000"
                     min="10000"
@@ -191,8 +194,9 @@
                   <input
                     class="form-check-input"
                     type="radio"
+                    name="bank"
                     :id="`bank${bank.bankId}`"
-                    v-model="bankId"
+                    v-model="donation.bank"
                     :value="bank.bankId"
                     required
                   >
@@ -222,6 +226,8 @@ import KProgress from 'k-progress';
 import _ from 'lodash';
 import vPagination from 'vue-plain-pagination';
 import utils from '@/assets/js/utils';
+import Donation from '../models/donation';
+import DonationService from '../services/donation.service';
 import FundraisingService from '../services/fundraising.service';
 
 export default {
@@ -275,52 +281,49 @@ export default {
       return this.currentUser && this.currentUser.roles.includes('ROLE_ADMIN');
     },
   },
-  data() {
-    return {
-      fundraising: {},
-      donations: [{
-        id: 'donation1',
-        nominal: 10000,
-        proof: 'donation1',
-        status: 'Pending',
-        createdAt: '2020-09-14T01:00:00+01:00',
-        createdBy: {
-          id: 'asdasfasfqwafw2',
-          username: 'your_username',
-        },
-        fundraising: {
-          title: 'Bantuan Banjir Palu',
-        },
-      }, {
-        id: 'donation2',
-        nominal: 10000,
-        proof: 'donation2',
-        status: 'Rejected',
-        createdAt: '2020-09-14T01:00:00+01:00',
-        createdBy: {
-          id: 'asdasfasfqwafw2',
-          username: 'your_username',
-        },
-        fundraising: {
-          title: 'Bantuan Banjir Palu',
-        },
-      }],
-      statuses: [
-        { name: 'All Donation', color: 'grey' },
-        { name: 'Verified', color: 'green' },
-        { name: 'Pending', color: 'yellow' },
-        { name: 'Rejected', color: 'red' },
-      ],
-      status: 'All Donation',
-      errors: {},
-      nominal: null,
-      bankId: null,
-      proof: null,
-      limit: 10,
-      page: 1,
-      errorMessage: '',
-    };
-  },
+  data: () => ({
+    donation: new Donation('', '', '', ''),
+    proof: null,
+    donations: [{
+      id: 'donation1',
+      nominal: 10000,
+      proof: 'donation1',
+      status: 'Pending',
+      createdAt: '2020-09-14T01:00:00+01:00',
+      createdBy: {
+        id: 'asdasfasfqwafw2',
+        username: 'your_username',
+      },
+      fundraising: {
+        title: 'Bantuan Banjir Palu',
+      },
+    }, {
+      id: 'donation2',
+      nominal: 10000,
+      proof: 'donation2',
+      status: 'Rejected',
+      createdAt: '2020-09-14T01:00:00+01:00',
+      createdBy: {
+        id: 'asdasfasfqwafw2',
+        username: 'your_username',
+      },
+      fundraising: {
+        title: 'Bantuan Banjir Palu',
+      },
+    }],
+    fundraising: {},
+    statuses: [
+      { name: 'All Donation', color: 'grey' },
+      { name: 'Verified', color: 'green' },
+      { name: 'Pending', color: 'yellow' },
+      { name: 'Rejected', color: 'red' },
+    ],
+    status: 'All Donation',
+    errors: {},
+    message: '',
+    limit: 10,
+    page: 1,
+  }),
   methods: {
     convertCurrency(nominal) {
       return utils.convertCurrency(nominal);
@@ -343,36 +346,60 @@ export default {
     setStatus(status) {
       this.status = status;
     },
-    submitForm(e) {
+    handleDonation() {
+      this.message = '';
       this.errors = {};
 
-      if (!this.bankId) {
+      if (_.isNil(this.donation.bank)) {
         this.errors.bank = 'Choose a bank';
       }
 
-      if (_.isEmpty(this.errors) && this.nominal) {
-        return true;
+      if (_.isEmpty(this.errors)) {
+        this.donation = {
+          ...this.donation,
+          donatur: this.currentUser.id,
+          fundraising: this.fundraising.id,
+        };
+
+        DonationService.postDonation(this.donation).then(
+          () => {
+            this.message = 'User registration is success';
+            this.$swal({
+              icon: 'success',
+              title: 'Success',
+              text: this.message,
+              timer: 2000,
+              timerProgressBar: true,
+              onClose: () => {
+                this.$router.go(`/fundraisings/${this.fundraising.id}`);
+              },
+            });
+          },
+          (error) => {
+            this.message = error.response.data.errorMessage
+              || error.response.data.status;
+            this.$swal({
+              icon: 'error',
+              title: 'Oops...',
+              text: this.message,
+            });
+          },
+        );
       }
-
-      e.preventDefault();
-
-      return false;
     },
   },
   mounted() {
     FundraisingService.getFundraisingById(this.$route.path.split('/')[2]).then(
       (response) => {
         this.fundraising = response.data.value;
-        console.log(response.data);
       },
       (error) => {
-        console.log(error.response.data);
-        this.errorMessage = error.response.data.errorMessage
+        this.message = error.response.data.errorMessage
               || error.response.data.status;
         this.$swal({
           icon: 'error',
           title: 'Oops...',
-          text: this.errorMessage,
+          text: this.message,
         });
       },
     );
