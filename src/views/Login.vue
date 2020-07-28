@@ -66,10 +66,11 @@ export default {
         this.$store.dispatch('auth/login', this.user).then(
           () => {
             this.loading = false;
-            this.$router.go('/profile');
+            this.$router.go('/');
           },
           (error) => {
-            this.message = error.response.data.errorMessage;
+            this.message = error.response.data.errorMessage
+              || error.response.data.status;
             this.$swal({
               icon: 'error',
               title: 'Oops...',

@@ -73,13 +73,10 @@ export default {
     FundraisingService.getAllFundraisings({ status: 'Ongoing' }).then(
       (response) => {
         this.fundraisings = response.data.content;
-        console.log(response.data.content);
       },
       (error) => {
         this.errorMessage = error.response.data.errorMessage
-              || (error.response && error.response.data)
-              || error.message
-              || error.toString();
+              || error.response.data.status;
         this.$swal({
           icon: 'error',
           title: 'Oops...',
