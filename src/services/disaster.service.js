@@ -15,6 +15,8 @@ class DisasterService {
     return axios.get(`${API_URL}${_.size(params) > 0 ? `?${_.join(params, '&')}` : ''}`);
   }
 
+  getDisasterById = id => axios.get(`${API_URL}/${id}`, { headers: authHeader() });
+
   postDisaster = disaster => axios.post(`${API_URL}`, {
     name: disaster.name,
     category: disaster.category,
