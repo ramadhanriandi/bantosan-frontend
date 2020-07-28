@@ -35,6 +35,8 @@ class DisasterService {
     evidence: disaster.evidence,
     display: disaster.display,
   }, { headers: authHeader() })
+
+  deleteDisaster = id => axios.delete(`${API_URL}/${id}`, { headers: authHeader() });
 }
 
 export default new DisasterService();
