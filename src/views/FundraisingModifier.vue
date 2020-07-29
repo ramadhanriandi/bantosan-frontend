@@ -9,7 +9,7 @@
         <p class="subtitle">{{ getSubtitle }}</p>
       </div>
     </div>
-    <form class="row text-left" @submit.prevent="postFundraising" method="post">
+    <form class="row text-left" @submit.prevent="handleSubmit" method="post">
       <div class="col-12 col-sm-12 col-lg-4 offset-0 offset-sm-0 offset-lg-1">
         <div class="form-group">
           <label>Title</label>
@@ -35,7 +35,7 @@
         <img
           v-if="getUrl === 'edit'"
           class="fundraising-img mb-3 w-100"
-          :src="require(`@/assets/img/${fundraising.image}`)"
+          :src="require(`@/assets/img/rectangle.png`)"
         />
         <div class="form-group">
           <label>Image</label>
@@ -132,7 +132,8 @@ export default {
     },
     getSubtitle() {
       return this.getUrl === 'create'
-        ? 'Fill in the form below to create a fundraising' : `Latest Update : ${this.convertDate(this.fundraising.updatedAt)}`;
+        ? 'Fill in the form below to create a fundraising'
+        : `Latest Update : ${this.convertDate(this.fundraising.updatedAt)}`;
     },
     getUrl() {
       const parsedUrl = this.$route.path.split('/');
@@ -140,11 +141,7 @@ export default {
     },
   },
   data: () => ({
-    banks: [
-      {
-        bankId: 0, name: null, accountNumber: null, accountHolder: null,
-      },
-    ],
+    banks: [],
     fundraising: new Fundraising(),
     message: '',
   }),
@@ -166,7 +163,9 @@ export default {
         this.banks.splice(index, 1);
       }
     },
-    postFundraising() {
+    handleSubmit() {
+      this.message = '';
+
       if (this.getUrl === 'create') {
         this.fundraising = {
           ...this.fundraising,
@@ -208,8 +207,60 @@ export default {
             });
           },
         );
+      } else if (this.getUrl === 'edit') {
+        FundraisingService.putFundraising(this.fundraising.id, this.fundraising).then(
+          () => {
+            this.message = 'Your fundraising is updated';
+            this.$swal({
+              icon: 'success',
+              title: 'Success',
+              text: this.message,
+              timer: 2000,
+              timerProgressBar: true,
+              onClose: () => {
+                this.$router.push(`/fundraising-list/${this.fundraising.id}`);
+              },
+            });
+          },
+          (error) => {
+            this.message = error.response.data.errorMessage
+              || error.response.data.status;
+            this.$swal({
+              icon: 'error',
+              title: 'Oops...',
+              text: this.message,
+            });
+          },
+        );
       }
     },
+  },
+  mounted() {
+    if (this.getUrl === 'edit') {
+      FundraisingService.getFundraisingById(this.$route.path.split('/')[2]).then(
+        (response) => {
+          this.fundraising = response.data.value;
+          this.banks = response.data.value.banks;
+          this.startDate = null;
+          this.status = 'Pending';
+        },
+        (error) => {
+          this.message = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.message,
+          });
+        },
+      );
+    } else {
+      this.banks = [
+        {
+          bankId: 0, name: null, accountNumber: null, accountHolder: null,
+        },
+      ];
+    }
   },
 };
 </script>
