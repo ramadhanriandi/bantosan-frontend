@@ -15,7 +15,7 @@ const convertDate = (date) => {
   return `${day} ${monthName} ${year}`;
 };
 
-const cutString = (string, maxLength) => (string.length > maxLength ? `${string.substring(0, maxLength)}...` : string);
+const cutString = (string, maxLength) => (string && string.length > maxLength ? `${string.substring(0, maxLength)}...` : string);
 
 const getDaysLeft = (date) => {
   const delta = date.getTime() - new Date().getTime();

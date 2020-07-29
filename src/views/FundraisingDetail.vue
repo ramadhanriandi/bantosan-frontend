@@ -71,7 +71,12 @@
     </div>
 
     <!-- Donation Table -->
-    <div class="row" v-if="getUrl === 'fundraising-list'">
+    <div
+      class="row"
+      v-if="getUrl === 'fundraising-list'
+        && fundraising && fundraising.organizer
+        && currentUser.id === fundraising.organizer.id"
+    >
       <div class="col-11 offset-1 pr-0">
         <div class="d-flex align-items-center mb-4 row">
           <div class="col-12 col-sm-12 col-lg-6">
@@ -105,7 +110,7 @@
               <tbody v-for="donation in getDonations.data" :key="donation.id">
                 <tr>
                   <td>{{ convertDate(donation.createdAt) }}</td>
-                  <td>{{ donation.createdBy.username }}</td>
+                  <td>{{ donation.donatur.username }}</td>
                   <td>IDR {{ convertCurrency(donation.nominal) }}</td>
                   <td v-if="!isAdmin">
                     <a
@@ -228,6 +233,7 @@ import vPagination from 'vue-plain-pagination';
 import utils from '@/assets/js/utils';
 import Donation from '../models/donation';
 import DonationService from '../services/donation.service';
+import Fundraising from '../models/fundraising';
 import FundraisingService from '../services/fundraising.service';
 
 export default {
@@ -284,34 +290,8 @@ export default {
   data: () => ({
     donation: new Donation('', '', '', ''),
     proof: null,
-    donations: [{
-      id: 'donation1',
-      nominal: 10000,
-      proof: 'donation1',
-      status: 'Pending',
-      createdAt: '2020-09-14T01:00:00+01:00',
-      createdBy: {
-        id: 'asdasfasfqwafw2',
-        username: 'your_username',
-      },
-      fundraising: {
-        title: 'Bantuan Banjir Palu',
-      },
-    }, {
-      id: 'donation2',
-      nominal: 10000,
-      proof: 'donation2',
-      status: 'Rejected',
-      createdAt: '2020-09-14T01:00:00+01:00',
-      createdBy: {
-        id: 'asdasfasfqwafw2',
-        username: 'your_username',
-      },
-      fundraising: {
-        title: 'Bantuan Banjir Palu',
-      },
-    }],
-    fundraising: {},
+    donations: [],
+    fundraising: new Fundraising(),
     statuses: [
       { name: 'All Donation', color: 'grey' },
       { name: 'Verified', color: 'green' },
@@ -402,6 +382,21 @@ export default {
           text: this.message,
         });
       },
+    ).then(
+      DonationService.getAllDonations({ fundraisingId: this.fundraising.id }).then(
+        (response) => {
+          this.donations = response.data.content;
+        },
+        (error) => {
+          this.errorMessage = error.response.data.errorMessage
+                || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.errorMessage,
+          });
+        },
+      ),
     );
   },
 };

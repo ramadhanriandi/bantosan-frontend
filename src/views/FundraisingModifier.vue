@@ -152,6 +152,7 @@ export default {
           name: null,
           accountNumber: null,
           accountHolder: null,
+          bankId: this.banks.length,
         });
       }
     },
