@@ -31,6 +31,7 @@
 
 <script>
 import KProgress from 'k-progress';
+import _ from 'lodash';
 import utils from '@/assets/js/utils';
 
 export default {
@@ -49,7 +50,7 @@ export default {
       return utils.convertCurrency(this.fundraising.totalDonation);
     },
     getFullname() {
-      return utils.cutString(this.fundraising.organizer.fullname, 31);
+      return utils.cutString(_.get(this.fundraising, ['organizer', 'fullname'], '-'), 31);
     },
     getPercentage() {
       const { totalDonation, target } = this.fundraising;
@@ -57,7 +58,7 @@ export default {
       return utils.getPercentage(totalDonation, target);
     },
     getTitle() {
-      return utils.cutString(this.fundraising.title, 41);
+      return utils.cutString(_.get(this.fundraising, 'title', '-'), 41);
     },
   },
 };

@@ -37,7 +37,7 @@
         </div>
       </div>
     </div>
-    <div v-if="fundraisings.length > 0">
+    <div v-if="fundraisings && fundraisings.length > 0">
       <div class="table-responsive">
         <table class="table">
           <thead>
@@ -115,7 +115,7 @@
         </table>
         <div class="d-flex justify-content-between">
           <div class="text-left">
-            Showing {{ getFundraisings.data.length }}
+            Showing {{ getFundraisings.data ? getFundraisings.data.length : '0' }}
             / {{ getFundraisings.count }} result{{ getFundraisings.count > 1 ? 's' : '' }}
           </div>
           <v-pagination v-model="page" :page-count="getMaxPage"></v-pagination>
@@ -154,7 +154,7 @@ export default {
       const lastBound = firstBound + this.limit;
 
       return {
-        count: filteredFundraisings.length,
+        count: filteredFundraisings ? filteredFundraisings.length : 0,
         data: filteredFundraisings.slice(firstBound, lastBound),
       };
     },
@@ -165,22 +165,20 @@ export default {
       return this.currentUser && this.currentUser.roles.includes('ROLE_ADMIN');
     },
   },
-  data() {
-    return {
-      fundraisings: [],
-      statuses: [
-        { name: 'All Fundraising', color: 'grey' },
-        { name: 'Ongoing', color: 'green' },
-        { name: 'Pending', color: 'yellow' },
-        { name: 'Rejected', color: 'red' },
-        { name: 'Done', color: 'light-grey' },
-      ],
-      limit: 10,
-      page: 1,
-      status: 'All Fundraising',
-      message: '',
-    };
-  },
+  data: () => ({
+    fundraisings: [],
+    statuses: [
+      { name: 'All Fundraising', color: 'grey' },
+      { name: 'Ongoing', color: 'green' },
+      { name: 'Pending', color: 'yellow' },
+      { name: 'Rejected', color: 'red' },
+      { name: 'Done', color: 'light-grey' },
+    ],
+    limit: 10,
+    page: 1,
+    status: 'All Fundraising',
+    message: '',
+  }),
   methods: {
     convertCurrency(nominal) {
       return utils.convertCurrency(nominal);
