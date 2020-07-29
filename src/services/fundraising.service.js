@@ -1,5 +1,6 @@
 import axios from 'axios';
 import _ from 'lodash';
+import authHeader from './auth-header';
 
 const API_URL = 'http://localhost:8080/api/fundraisings';
 
@@ -18,6 +19,15 @@ class FundraisingService {
   }
 
   getFundraisingById = id => axios.get(`${API_URL}/${id}`);
+
+  postFundraising = fundraising => axios.post(`${API_URL}`, {
+    title: fundraising.title,
+    description: fundraising.description,
+    day: fundraising.day,
+    target: fundraising.target,
+    banks: fundraising.banks,
+    organizer: fundraising.organizer,
+  }, { headers: authHeader() })
 }
 
 export default new FundraisingService();

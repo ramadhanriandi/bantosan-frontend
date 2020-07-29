@@ -9,7 +9,7 @@
         <p class="subtitle">{{ getSubtitle }}</p>
       </div>
     </div>
-    <form class="row text-left" @submit="submitForm" method="post">
+    <form class="row text-left" @submit.prevent="postFundraising" method="post">
       <div class="col-12 col-sm-12 col-lg-4 offset-0 offset-sm-0 offset-lg-1">
         <div class="form-group">
           <label>Title</label>
@@ -72,7 +72,7 @@
         </div>
       </div>
       <div class="col-12 col-sm-12 col-lg-4">
-        <div v-for="(bank, index) in fundraising.banks" :key="index" class="card p-3 mb-3">
+        <div v-for="(bank, index) in banks" :key="index" class="card p-3 mb-3">
           <div class="form-row">
             <div class="form-group col-4">
               <label>Bank</label>
@@ -119,6 +119,8 @@
 
 <script>
 import utils from '@/assets/js/utils';
+import Fundraising from '../models/fundraising';
+import FundraisingService from '../services/fundraising.service';
 
 export default {
   computed: {
@@ -137,34 +139,19 @@ export default {
       return parsedUrl[parsedUrl.length - 1];
     },
   },
-  data() {
-    return {
-      fundraising: {
-        id: 'abcdef1',
-        title: 'Bantuan Kemanusiaan Tsunami Aceh',
-        image: 'rectangle.png',
-        description: 'Pengungsi Masih Terlunta, Ayo Bangun Lebak Kembali! Sebanyak 6 kecamatan yang meliputi 30 desa di Kabupaten Lebak terdampak banjir. Qadarullah, kejadian itu juga menyebabkan 10 orang meninggal dunia dan 67 orang luka-luka. Selain korban jiwa, sebanyak 16 sekolah juga mengalami kerusakan serta 1.253 siswa terdampak. Banjir itu juga menerjang 18 pesantren, 28 jembatan, 5 jaringan irigasi, dan hampir seribu hektar sawah warga. Dan, sebanyak 3.041 unit rumah mengalami kerusakan yang menyebabkan ribuan warga harus mengungsi karena banyak dari mereka yang rumahnya tak layak dihuni lagi.',
-        target: 40000000000,
-        updatedAt: '2020-09-14T01:00:00+01:00',
-        day: 100,
-        banks: [{
-          bankId: 0,
-          name: 'BNI',
-          accountNumber: '1241241241',
-          accountHolder: 'Any Name Here',
-        }, {
-          bankId: 1,
-          name: 'BRI',
-          accountNumber: '1241241241',
-          accountHolder: 'Any Name Here',
-        }],
+  data: () => ({
+    banks: [
+      {
+        bankId: 0, name: null, accountNumber: null, accountHolder: null,
       },
-    };
-  },
+    ],
+    fundraising: new Fundraising(),
+    message: '',
+  }),
   methods: {
     addBank() {
-      if (this.fundraising.banks.length < 3) {
-        this.fundraising.banks.push({
+      if (this.banks.length < 3) {
+        this.banks.push({
           name: null,
           accountNumber: null,
           accountHolder: null,
@@ -175,22 +162,53 @@ export default {
       return utils.convertDate(new Date(date));
     },
     removeBank(index) {
-      if (this.fundraising.banks.length > 1) {
-        this.fundraising.banks.splice(index, 1);
+      if (this.banks.length > 1) {
+        this.banks.splice(index, 1);
       }
     },
-    submitForm(e) {
-      const {
-        title, description, days, target,
-      } = this.fundraising;
+    postFundraising() {
+      if (this.getUrl === 'create') {
+        this.fundraising = {
+          ...this.fundraising,
+          banks: this.banks,
+          organizer: this.$store.state.auth.user.id,
+        };
 
-      if (title && description && days && target) {
-        return true;
+        FundraisingService.postFundraising(this.fundraising).then(
+          (response) => {
+            const { success, errorMessage } = response.data;
+            if (success) {
+              this.message = 'Your fundraising submission is success';
+              this.$swal({
+                icon: 'success',
+                title: 'Success',
+                text: this.message,
+                timer: 2000,
+                timerProgressBar: true,
+                onClose: () => {
+                  this.$router.push('/fundraising-list');
+                },
+              });
+            } else {
+              this.message = errorMessage;
+              this.$swal({
+                icon: 'error',
+                title: 'Oops...',
+                text: this.message,
+              });
+            }
+          },
+          (error) => {
+            this.message = error.response.data.errorMessage
+              || error.response.data.status;
+            this.$swal({
+              icon: 'error',
+              title: 'Oops...',
+              text: this.message,
+            });
+          },
+        );
       }
-
-      e.preventDefault();
-
-      return false;
     },
   },
 };
