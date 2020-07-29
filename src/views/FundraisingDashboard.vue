@@ -91,6 +91,7 @@
                   v-if="!isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2"
                   :class="fundraising.status === 'Ongoing' ? 'btn-light-grey' : 'btn-purple'"
+                  @click="deleteFundraising(fundraising.id)"
                 >
                   <img src="@/assets/img/delete.png" />
                 </div>
@@ -177,6 +178,7 @@ export default {
       limit: 10,
       page: 1,
       status: 'All Fundraising',
+      message: '',
     };
   },
   methods: {
@@ -207,6 +209,32 @@ export default {
     },
     setStatus(status) {
       this.status = status;
+    },
+    deleteFundraising(id) {
+      FundraisingService.deleteFundraising(id).then(
+        () => {
+          this.message = 'The fundraising is deleted';
+          this.$swal({
+            icon: 'success',
+            title: 'Success',
+            text: this.message,
+            timer: 2000,
+            timerProgressBar: true,
+            onClose: () => {
+              this.$router.go();
+            },
+          });
+        },
+        (error) => {
+          this.message = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.message,
+          });
+        },
+      );
     },
   },
   mounted() {

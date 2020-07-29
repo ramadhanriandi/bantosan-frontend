@@ -38,6 +38,8 @@ class FundraisingService {
     banks: fundraising.banks,
     organizer: fundraising.organizer,
   }, { headers: authHeader() })
+
+  deleteFundraising = id => axios.delete(`${API_URL}/${id}`, { headers: authHeader() });
 }
 
 export default new FundraisingService();
