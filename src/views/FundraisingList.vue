@@ -63,12 +63,10 @@ export default {
       return this.$store.state.auth.status.loggedIn;
     },
   },
-  data() {
-    return {
-      fundraisings: [],
-      searchName: '',
-    };
-  },
+  data: () => ({
+    fundraisings: [],
+    searchName: '',
+  }),
   mounted() {
     FundraisingService.getAllFundraisings({ status: 'Ongoing' }).then(
       (response) => {
