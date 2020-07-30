@@ -91,7 +91,7 @@
                   v-if="!isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2"
                   :class="fundraising.status === 'Ongoing' ? 'btn-light-grey' : 'btn-purple'"
-                  @click="deleteFundraising(fundraising.id)"
+                  @click="fundraising.status !== 'Ongoing' && deleteFundraising(fundraising.id)"
                 >
                   <img src="@/assets/img/delete.png" />
                 </div>
@@ -99,6 +99,8 @@
                   v-if="isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2 mr-1"
                   :class="fundraising.status === 'Ongoing' ? 'btn-light-grey' : 'btn-green'"
+                  @click="fundraising.status !== 'Ongoing'
+                    && updateFundraising(fundraising, 'Ongoing')"
                 >
                   <img src="@/assets/img/verify.png" />
                 </div>
@@ -106,6 +108,8 @@
                   v-if="isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2"
                   :class="fundraising.status === 'Pending' ? 'btn-red' : 'btn-light-grey'"
+                  @click="(fundraising.status === 'Pending')
+                    && updateFundraising(fundraising, 'Rejected')"
                 >
                   <img src="@/assets/img/unverify.png" />
                 </div>
@@ -208,6 +212,39 @@ export default {
     setStatus(status) {
       this.status = status;
     },
+    updateFundraising(fundraising, status) {
+      const updatedFundraising = {
+        ...fundraising,
+        status: status || fundraising.status,
+      };
+
+      FundraisingService.putFundraising(updatedFundraising.id, updatedFundraising).then(
+        () => {
+          this.message = status === 'Verified'
+            ? 'The fundraising is verified'
+            : 'The fundraising is rejected';
+          this.$swal({
+            icon: 'success',
+            title: 'Success',
+            text: this.message,
+            timer: 2000,
+            timerProgressBar: true,
+            onClose: () => {
+              this.$router.go();
+            },
+          });
+        },
+        (error) => {
+          this.message = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.message,
+          });
+        },
+      );
+    },
     deleteFundraising(id) {
       FundraisingService.deleteFundraising(id).then(
         () => {
@@ -236,7 +273,11 @@ export default {
     },
   },
   mounted() {
-    FundraisingService.getAllFundraisings({ userId: this.currentUser.id }).then(
+    let option = {};
+    if (!this.isAdmin) {
+      option = { userId: this.currentUser.id };
+    }
+    FundraisingService.getAllFundraisings(option).then(
       (response) => {
         this.fundraisings = response.data.content;
       },

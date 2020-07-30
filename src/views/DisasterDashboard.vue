@@ -106,7 +106,7 @@
                   v-if="!isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2"
                   :class="disaster.status === 'Verified' ? 'btn-light-grey' : 'btn-purple'"
-                  @click="deleteDisaster(disaster.id)"
+                  @click="disaster.status !== 'Verified' && deleteDisaster(disaster.id)"
                 >
                   <img src="@/assets/img/delete.png" />
                 </div>
@@ -124,7 +124,7 @@
                   class="btn-xs cursor-pointer d-inline p-2"
                   :class="disaster.status === 'Rejected' ? 'btn-light-grey' : 'btn-red'"
                   @click="disaster.status !== 'Rejected'
-                    && updateDisaster(disaster, 'Hidden', 'Verified')"
+                    && updateDisaster(disaster, 'Hidden', 'Rejected')"
                 >
                   <img src="@/assets/img/unverify.png" />
                 </div>
@@ -210,13 +210,13 @@ export default {
       this.status = status;
     },
     updateDisaster(disaster, display, status) {
-      const updateDisaster = {
+      const updatedDisaster = {
         ...disaster,
         display: display || disaster.display,
         status: status || disaster.status,
       };
 
-      DisasterService.putDisaster(updateDisaster.id, updateDisaster).then(
+      DisasterService.putDisaster(updatedDisaster.id, updatedDisaster).then(
         () => {
           this.message = 'The disaster report is updated';
           this.$swal({
