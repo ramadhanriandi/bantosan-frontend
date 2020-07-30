@@ -130,12 +130,16 @@
                     <div
                       class="btn-xs cursor-pointer d-inline p-2 mr-1"
                       :class="donation.status === 'Verified' ? 'btn-light-grey' : 'btn-green'"
+                      @click="donation.status !== 'Verified'
+                        && putDonation(donation.id, 'Verified')"
                     >
                       <img src="@/assets/img/verify.png" />
                     </div>
                     <div
                       class="btn-xs cursor-pointer d-inline p-2"
                       :class="donation.status === 'Rejected' ? 'btn-light-grey' : 'btn-red'"
+                      @click="donation.status !== 'Rejected'
+                        && putDonation(donation.id, 'Rejected')"
                     >
                       <img src="@/assets/img/unverify.png" />
                     </div>
@@ -171,7 +175,7 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
-            <form class="text-left mt-3" @submit.prevent="handleDonation" method="post">
+            <form class="text-left mt-3" @submit.prevent="postDonation" method="post">
               <div class="form-group">
                 <label>Nominal</label>
                 <div class="input-group">
@@ -326,7 +330,7 @@ export default {
     setStatus(status) {
       this.status = status;
     },
-    handleDonation() {
+    postDonation() {
       this.message = '';
       this.errors = {};
 
@@ -367,11 +371,55 @@ export default {
         );
       }
     },
+    putDonation(donationId, status) {
+      this.message = '';
+
+      DonationService.putDonation(donationId, status).then(
+        () => {
+          this.message = status === 'Verified'
+            ? 'The donation is verified'
+            : 'The donation is rejected';
+          this.$swal({
+            icon: 'success',
+            title: 'Success',
+            text: this.message,
+            timer: 2000,
+            timerProgressBar: true,
+            onClose: () => {
+              this.$router.go(`/fundraisings/${this.fundraising.id}`);
+            },
+          });
+        },
+        (error) => {
+          this.message = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.message,
+          });
+        },
+      );
+    },
   },
   mounted() {
     FundraisingService.getFundraisingById(this.$route.path.split('/')[2]).then(
-      (response) => {
-        this.fundraising = response.data.value;
+      (fundraisingResponse) => {
+        this.fundraising = fundraisingResponse.data.value;
+        DonationService.getAllDonations({ fundraisingId: this.fundraising.id }).then(
+          (donationResponse) => {
+            this.donations = donationResponse.data.content;
+          },
+          (error) => {
+            this.errorMessage = error.response.data.errorMessage
+                  || error.response.data.status;
+            this.$swal({
+              icon: 'error',
+              title: 'Oops...',
+              text: this.errorMessage,
+            });
+          },
+        );
       },
       (error) => {
         this.message = error.response.data.errorMessage
@@ -382,21 +430,6 @@ export default {
           text: this.message,
         });
       },
-    ).then(
-      DonationService.getAllDonations({ fundraisingId: this.fundraising.id }).then(
-        (response) => {
-          this.donations = response.data.content;
-        },
-        (error) => {
-          this.errorMessage = error.response.data.errorMessage
-                || error.response.data.status;
-          this.$swal({
-            icon: 'error',
-            title: 'Oops...',
-            text: this.errorMessage,
-          });
-        },
-      ),
     );
   },
 };
