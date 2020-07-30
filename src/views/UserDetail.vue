@@ -17,7 +17,7 @@
         </p>
       </div>
     </div>
-    <form class="row text-left" @submit="submitForm" method="post">
+    <form class="row text-left" @submit.prevent="updateUser" method="post">
       <div
         class="mb-4 mb-sm-4 mb-lg-0 col-12 col-sm-12 col-lg-4"
         :class="{ 'offset-0 offset-sm-0 offset-lg-1': getUrl === 'user-list' }"
@@ -231,6 +231,7 @@ export default {
       { name: 'Rejected', color: 'red', text: 'Your account hasn’t been verified' },
       { name: 'Unverified', color: 'grey', text: 'Your account hasn’t been verified' },
     ],
+    message: '',
   }),
   methods: {
     convertDate(date) {
@@ -242,12 +243,13 @@ export default {
     getText(status) {
       return _.get(_.find(this.statuses, { name: status }), 'text');
     },
-    submitForm(e) {
-      const {
-        username, email, fullname, phone,
-      } = this.user;
-
+    updateUser() {
+      this.message = '';
       this.errors = {};
+
+      const {
+        id, username, email, fullname, phone,
+      } = this.user;
 
       if (username === 'existed_username') {
         this.errors.username = 'Username already exists';
@@ -266,13 +268,32 @@ export default {
         }
       }
 
-      if (_.isEmpty(this.errors) && username && email) {
-        return true;
+      if (_.isEmpty(this.errors)) {
+        AuthService.updateUser(id, this.user).then(
+          () => {
+            this.message = 'The user profile is updated';
+            this.$swal({
+              icon: 'success',
+              title: 'Success',
+              text: this.message,
+              timer: 2000,
+              timerProgressBar: true,
+              onClose: () => {
+                this.$router.go();
+              },
+            });
+          },
+          (error) => {
+            this.message = error.response.data.errorMessage
+              || error.response.data.status;
+            this.$swal({
+              icon: 'error',
+              title: 'Oops...',
+              text: this.message,
+            });
+          },
+        );
       }
-
-      e.preventDefault();
-
-      return false;
     },
     submitModalForm(e) {
       e.preventDefault();
