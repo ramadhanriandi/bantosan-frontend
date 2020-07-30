@@ -26,6 +26,10 @@ class DonationService {
     bank: donation.bank,
     fundraising: donation.fundraising,
   }, { headers: authHeader() })
+
+  putDonation = (id, status) => axios.put(`${API_URL}/${id}`, {
+    status,
+  }, { headers: authHeader() })
 }
 
 export default new DonationService();
