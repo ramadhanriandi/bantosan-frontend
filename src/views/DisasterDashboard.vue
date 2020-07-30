@@ -56,28 +56,34 @@
               <td>{{ disaster.name }}</td>
               <td>{{ disaster.location.name }}</td>
               <td>{{ disaster.category }}</td>
-              <td v-if="isAdmin">{{ disaster.createdBy.username }}</td>
+              <td v-if="isAdmin">{{ disaster && disaster.reporter.username }}</td>
               <td v-if="isAdmin">
                 <div
                   v-if="disaster.status === 'Verified'"
                   class="btn-xs d-inline p-2 mr-1"
-                  :class="`btn-${getDisplayColor(disaster.display, 'Show')}-reverse
-                  btn-${getDisplayColor(disaster.display, 'Show')}-outline`"
+                  :class="`btn-${getDisplayColor(disaster && disaster.display, 'Show')}-reverse
+                  btn-${getDisplayColor(disaster && disaster.display, 'Show')}-outline`"
+                  @click="disaster.display !== 'Show'
+                    && updateDisaster(disaster, 'Show', null)"
                 >
                   Show
                 </div>
                 <div
                   v-if="disaster.status === 'Verified'"
                   class="btn-xs d-inline p-2"
-                  :class="`btn-${getDisplayColor(disaster.display, 'Hidden')}-reverse
-                  btn-${getDisplayColor(disaster.display, 'Hidden')}-outline`"
+                  :class="`btn-${getDisplayColor(disaster && disaster.display, 'Hidden')}-reverse
+                  btn-${getDisplayColor(disaster && disaster.display, 'Hidden')}-outline`"
+                  @click="disaster.display !== 'Hidden'
+                    && updateDisaster(disaster, 'Hidden', null)"
                 >
                   Hidden
                 </div>
                 <div v-if="disaster.status !== 'Verified'">-</div>
               </td>
               <td>
-                <div :class="`btn-xs btn-${getColor(disaster.status)} d-inline py-2 px-3`">
+                <div
+                  :class="`btn-xs btn-${getColor(disaster && disaster.status)} d-inline py-2 px-3`"
+                >
                   {{ disaster.status }}
                 </div>
               </td>
@@ -108,6 +114,8 @@
                   v-if="isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2 mr-1"
                   :class="disaster.status === 'Verified' ? 'btn-light-grey' : 'btn-green'"
+                  @click="disaster.status !== 'Verified'
+                    && updateDisaster(disaster, 'Show', 'Verified')"
                 >
                   <img src="@/assets/img/verify.png" />
                 </div>
@@ -115,6 +123,8 @@
                   v-if="isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2"
                   :class="disaster.status === 'Rejected' ? 'btn-light-grey' : 'btn-red'"
+                  @click="disaster.status !== 'Rejected'
+                    && updateDisaster(disaster, 'Hidden', 'Verified')"
                 >
                   <img src="@/assets/img/unverify.png" />
                 </div>
@@ -181,7 +191,7 @@ export default {
   }),
   methods: {
     getColor(status) {
-      return _.find(this.statuses, { name: status }).color;
+      return _.get(_.find(this.statuses, { name: status }), 'color');
     },
     getDisplayColor(disasterDisplay, display) {
       return disasterDisplay === display ? 'purple' : 'grey';
@@ -198,6 +208,38 @@ export default {
     },
     setStatus(status) {
       this.status = status;
+    },
+    updateDisaster(disaster, display, status) {
+      const updateDisaster = {
+        ...disaster,
+        display: display || disaster.display,
+        status: status || disaster.status,
+      };
+
+      DisasterService.putDisaster(updateDisaster.id, updateDisaster).then(
+        () => {
+          this.message = 'The disaster report is updated';
+          this.$swal({
+            icon: 'success',
+            title: 'Success',
+            text: this.message,
+            timer: 2000,
+            timerProgressBar: true,
+            onClose: () => {
+              this.$router.go();
+            },
+          });
+        },
+        (error) => {
+          this.message = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.message,
+          });
+        },
+      );
     },
     deleteDisaster(id) {
       DisasterService.deleteDisaster(id).then(
@@ -227,7 +269,11 @@ export default {
     },
   },
   mounted() {
-    DisasterService.getAllDisasters({ userId: this.currentUser.id }).then(
+    let option = {};
+    if (!this.isAdmin) {
+      option = { userId: this.currentUser.id };
+    }
+    DisasterService.getAllDisasters(option).then(
       (response) => {
         this.disasters = response.data.content;
       },

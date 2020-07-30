@@ -72,6 +72,7 @@ th {
   border-radius: 7px;
   font-size: 10px;
   border: none;
+  cursor: pointer;
 }
 
 .btn-red, .btn-red:hover {
