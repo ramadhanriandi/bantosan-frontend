@@ -22,7 +22,7 @@
         class="mb-4 mb-sm-4 mb-lg-0 col-12 col-sm-12 col-lg-4"
         :class="{ 'offset-0 offset-sm-0 offset-lg-1': getUrl === 'user-list' }"
       >
-        <div class="d-flex" :class="{ 'mb-4': getUrl === 'profile' && getUser.role === 'User'}">
+        <div class="d-flex" :class="{ 'mb-4': getUrl === 'profile' && !isAdmin}">
           <img
             class="mr-4 user-detail-avatar"
             :src="require(`@/assets/img/${user.avatar ? user.avatar : 'big-avatar.png'}`)"
@@ -32,7 +32,7 @@
             <input type="file" class="user-profile-avatar-edit-button" id="user-avatar" />
           </label>
           <div>
-            <div class="user-detail-username mt-3 mb-1">{{ currentUser.username }}</div>
+            <div class="user-detail-username mt-3 mb-1">{{ user.username }}</div>
             <div class="user-detail-email mb-2">{{ user.email }}</div>
             <div
               v-if="getUrl === 'user-list'"
@@ -40,7 +40,7 @@
             >
               {{ user.status }}
             </div>
-            <div v-else-if="getUser.role === 'Admin'" class="user-detail-status text-green">
+            <div v-else-if="isAdmin" class="user-detail-status text-green">
               Administrator
             </div>
             <div
@@ -194,8 +194,9 @@
 
 <script>
 import _ from 'lodash';
-import { mapGetters } from 'vuex';
 import utils from '@/assets/js/utils';
+import User from '../models/user';
+import AuthService from '../services/auth.service';
 
 export default {
   name: 'Profile',
@@ -213,26 +214,17 @@ export default {
 
       return username && email && fullname && phone;
     },
+    isAdmin() {
+      return this.currentUser && this.currentUser.roles.includes('ROLE_ADMIN');
+    },
     showVerificationButton() {
-      return this.getUrl === 'profile' && this.getUser.role === 'User'
+      return this.getUrl === 'profile' && !this.isAdmin
         && (this.user.status === 'Rejected' || this.user.status === 'Unverified');
     },
-    ...mapGetters([
-      'getUser',
-    ]),
   },
   data: () => ({
     errors: {},
-    user: {
-      id: 'asfaslfaslfbasldas1',
-      username: 'your_username',
-      email: 'your_email@gmail.com',
-      status: 'Unverified',
-      fullname: 'Full name',
-      phone: '231241241',
-      avatar: 'big-avatar.png',
-      updatedAt: '2020-09-14T01:00:00+01:00',
-    },
+    user: new User(),
     statuses: [
       { name: 'Verified', color: 'green', text: 'Your account has been verified' },
       { name: 'Pending', color: 'yellow', text: 'Your verification is still waiting' },
@@ -245,10 +237,10 @@ export default {
       return utils.convertDate(new Date(date));
     },
     getColor(status) {
-      return _.find(this.statuses, { name: status }).color;
+      return _.get(_.find(this.statuses, { name: status }), 'color');
     },
     getText(status) {
-      return _.find(this.statuses, { name: status }).text;
+      return _.get(_.find(this.statuses, { name: status }), 'text');
     },
     submitForm(e) {
       const {
@@ -292,6 +284,22 @@ export default {
     if (!this.currentUser) {
       this.$router.push('/login');
     }
+
+    const id = this.getUrl === 'user-list' ? this.$route.path.split('/')[2] : this.currentUser.id;
+    AuthService.getUserById(id).then(
+      (response) => {
+        this.user = response.data.value;
+      },
+      (error) => {
+        this.errorMessage = error.response.data.errorMessage
+              || error.response.data.status;
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.errorMessage,
+        });
+      },
+    );
   },
 };
 </script>

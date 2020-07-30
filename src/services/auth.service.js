@@ -1,4 +1,5 @@
 import axios from 'axios';
+import authHeader from './auth-header';
 
 const API_URL = 'http://localhost:8080/api/users';
 
@@ -22,6 +23,18 @@ class AuthService {
     email: user.email,
     password: user.password,
   })
+
+  getAllUsers = () => axios.get(`${API_URL}`, { headers: authHeader() });
+
+  getUserById = id => axios.get(`${API_URL}/${id}`, { headers: authHeader() });
+
+  updateUser = (id, user) => axios.put(`${API_URL}/${id}`, {
+    username: user.username,
+    email: user.email,
+    fullname: user.fullname,
+    phone: user.phone,
+    status: user.status,
+  }, { headers: authHeader() })
 }
 
 export default new AuthService();
