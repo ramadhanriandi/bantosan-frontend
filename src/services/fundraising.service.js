@@ -27,6 +27,7 @@ class FundraisingService {
     target: fundraising.target,
     banks: fundraising.banks,
     organizer: fundraising.organizer,
+    image: fundraising.image,
   }, { headers: authHeader() })
 
   putFundraising = (id, fundraising) => axios.put(`${API_URL}/${id}`, {
@@ -37,6 +38,7 @@ class FundraisingService {
     status: fundraising.status,
     banks: fundraising.banks,
     organizer: fundraising.organizer,
+    image: fundraising.image,
   }, { headers: authHeader() })
 
   deleteFundraising = id => axios.delete(`${API_URL}/${id}`, { headers: authHeader() });

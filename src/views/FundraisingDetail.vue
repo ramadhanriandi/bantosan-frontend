@@ -9,7 +9,10 @@
         </router-link>
       </div>
       <div class="col-12 col-sm-12 col-lg-4 mb-4 mb-sm-4 mb-lg-0">
-        <img class="fundraising-img w-100" :src="require(`@/assets/img/rectangle.png`)" />
+        <img
+          class="fundraising-img w-100"
+          :src="`http://localhost:5000/images/${fundraising.image ? fundraising.image : 'rectangle.png'}`"
+        />
       </div>
       <div class="col-12 col-sm-12 col-lg-7 text-left">
         <h2 class="title mb-3">{{ fundraising.title }}</h2>
@@ -114,12 +117,14 @@
                   <td>IDR {{ convertCurrency(donation.nominal) }}</td>
                   <td v-if="!isAdmin">
                     <a
-                      :href="`/fundraising-list/${fundraising.id}/${donation.proof}`"
+                      :href="`http://localhost:5000/images/${donation.proof}`"
                       target="_blank"
                       class="btn-xs btn-grey py-2 px-3"
+                      v-if="donation.proof"
                     >
                       View File
                     </a>
+                    <p v-else>-</p>
                   </td>
                   <td>
                     <div :class="`btn-xs btn-${getColor(donation.status)} d-inline py-2 px-3`">
@@ -217,7 +222,19 @@
               <div class="form-group">
                 <label>Upload Transaction Proof</label>
                 <div class="custom-file">
-                  <input type="file" class="custom-file-input" id="customFile">
+                  <input
+                    type="hidden"
+                    class="form-control"
+                    v-model="donation.proof"
+                    required
+                  />
+                  <input
+                    type="file"
+                    class="custom-file-input"
+                    id="customFile"
+                    ref="file"
+                    @change="sendFile"
+                  >
                   <label class="custom-file-label" for="customFile">Choose file</label>
                 </div>
               </div>
@@ -231,10 +248,12 @@
 </template>
 
 <script>
+import axios from 'axios';
 import KProgress from 'k-progress';
 import _ from 'lodash';
 import vPagination from 'vue-plain-pagination';
 import utils from '@/assets/js/utils';
+import Configs from '../constants/config';
 import Donation from '../models/donation';
 import DonationService from '../services/donation.service';
 import Fundraising from '../models/fundraising';
@@ -400,6 +419,33 @@ export default {
           });
         },
       );
+    },
+    async sendFile() {
+      this.message = '';
+
+      const image = this.$refs.file.files[0];
+      const formData = new FormData();
+      formData.append('file', image);
+
+      try {
+        const response = await axios.post(`${Configs.STATIC_SERVER_URL}/upload`, formData);
+        this.donation.proof = response.data.file;
+        this.message = 'Image file uploaded';
+        this.$swal({
+          icon: 'success',
+          title: 'Success',
+          text: this.message,
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } catch (err) {
+        this.message = 'Failed to upload image file';
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.message,
+        });
+      }
     },
   },
   mounted() {

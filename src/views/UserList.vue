@@ -35,7 +35,7 @@
               <td>{{ user.username }}</td>
               <td v-if="user.identity">
                 <a
-                  :href="`/user-list/${user.id}/${user.identity}`"
+                  :href="`http://localhost:5000/images/${user.identity}`"
                   target="_blank"
                   class="btn-xs btn-grey py-2 px-3"
                 >

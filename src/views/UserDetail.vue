@@ -23,13 +23,25 @@
         :class="{ 'offset-0 offset-sm-0 offset-lg-1': getUrl === 'user-list' }"
       >
         <div class="d-flex" :class="{ 'mb-4': getUrl === 'profile' && !isAdmin}">
-          <img
-            class="mr-4 user-detail-avatar"
-            :src="require(`@/assets/img/${user.avatar ? user.avatar : 'big-avatar.png'}`)"
+          <div class="mr-4 user-detail-avatar">
+            <img
+              :src="`http://localhost:5000/images/${user.avatar ? user.avatar : 'big-avatar.png'}`"
+            />
+          </div>
+          <input
+            type="hidden"
+            class="form-control"
+            v-model="user.avatar"
           />
           <label for="user-avatar" v-if="getUrl === 'profile'">
             <img class="user-profile-avatar-edit p-1" src="@/assets/img/edit-avatar.png" />
-            <input type="file" class="user-profile-avatar-edit-button" id="user-avatar" />
+            <input
+              type="file"
+              class="user-profile-avatar-edit-button"
+              id="user-avatar"
+              ref="avatar"
+              @change="sendAvatar"
+            />
           </label>
           <div>
             <div class="user-detail-username mt-3 mb-1">{{ user.username }}</div>
@@ -82,13 +94,6 @@
             placeholder="Username"
             required
           />
-          <small
-            v-if="errors && errors.username"
-            id="usernameHelp"
-            class="form-text text-right"
-          >
-            {{ errors.username }}
-          </small>
         </div>
         <div class="form-group">
           <label>Email</label>
@@ -157,6 +162,7 @@
       </div>
     </form>
 
+    <!-- Modal -->
     <div
       class="modal fade"
       id="verification-modal"
@@ -170,16 +176,30 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
-            <form class="text-left mt-3" @submit="submitModalForm" method="post">
+            <form class="text-left mt-3" @submit.prevent="updateUser" method="post">
               <h2 class="title mb-2">Verify Your Account</h2>
               <p class="subtitle">
                 Upload a photo of yourself holding your identity card
                 (KTP or SIM or Passport) next to your face.
               </p>
-              <img class="mb-4 w-100" src="@/assets/img/selfie.png" />
+              <img
+                class="mb-4 w-100"
+                :src="`http://localhost:5000/images/${user.identity ? user.identity : 'selfie.png'}`"
+              />
               <div class="form-group">
                 <div class="custom-file">
-                  <input type="file" class="custom-file-input" id="customFile">
+                  <input
+                    type="hidden"
+                    class="form-control"
+                    v-model="user.identity"
+                  />
+                  <input
+                    type="file"
+                    class="custom-file-input"
+                    id="customFile"
+                    ref="identity"
+                    @change="sendIdentity"
+                  >
                   <label class="custom-file-label" for="customFile">Choose file</label>
                 </div>
               </div>
@@ -193,8 +213,10 @@
 </template>
 
 <script>
+import axios from 'axios';
 import _ from 'lodash';
 import utils from '@/assets/js/utils';
+import Configs from '../constants/config';
 import User from '../models/user';
 import AuthService from '../services/auth.service';
 
@@ -232,6 +254,7 @@ export default {
       { name: 'Unverified', color: 'grey', text: 'Your account hasn’t been verified' },
     ],
     message: '',
+
   }),
   methods: {
     convertDate(date) {
@@ -248,12 +271,9 @@ export default {
       this.errors = {};
 
       const {
-        id, username, email, fullname, phone,
+        id, email, fullname, phone, identity,
       } = this.user;
 
-      if (username === 'existed_username') {
-        this.errors.username = 'Username already exists';
-      }
       if (!utils.validEmail(email)) {
         this.errors.email = 'Invalid email format';
       }
@@ -266,6 +286,10 @@ export default {
         } else if (!utils.isNumberOnly(phone)) {
           this.errors.phone = 'At least 8-12 digits and contains only numbers';
         }
+      }
+
+      if (!_.isNil(identity)) {
+        this.user.status = 'Pending';
       }
 
       if (_.isEmpty(this.errors)) {
@@ -295,10 +319,59 @@ export default {
         );
       }
     },
-    submitModalForm(e) {
-      e.preventDefault();
+    async sendAvatar() {
+      this.message = '';
 
-      return false;
+      const image = this.$refs.avatar.files[0];
+      const formData = new FormData();
+      formData.append('file', image);
+
+      try {
+        const response = await axios.post(`${Configs.STATIC_SERVER_URL}/upload`, formData);
+        this.user.avatar = response.data.file;
+        this.message = 'Image file uploaded';
+        this.$swal({
+          icon: 'success',
+          title: 'Success',
+          text: this.message,
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } catch (err) {
+        this.message = 'Failed to upload image file';
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.message,
+        });
+      }
+    },
+    async sendIdentity() {
+      this.message = '';
+
+      const image = this.$refs.identity.files[0];
+      const formData = new FormData();
+      formData.append('file', image);
+
+      try {
+        const response = await axios.post(`${Configs.STATIC_SERVER_URL}/upload`, formData);
+        this.user.identity = response.data.file;
+        this.message = 'Image file uploaded';
+        this.$swal({
+          icon: 'success',
+          title: 'Success',
+          text: this.message,
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } catch (err) {
+        this.message = 'Failed to upload image file';
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.message,
+        });
+      }
     },
   },
   mounted() {
@@ -329,7 +402,17 @@ export default {
 @import '@/assets/scss/color.scss';
 
 .user-detail-avatar {
+  border-radius: 50%;
+  display: inline-block;
   max-height: 105px;
+  max-width: 105px;
+  overflow: hidden;
+  position: relative;
+}
+
+.user-detail-avatar img {
+  height: 100%;
+  width: auto;
 }
 
 .user-detail-email {

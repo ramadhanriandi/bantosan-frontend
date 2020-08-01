@@ -1,7 +1,11 @@
 <template>
   <router-link :to="`/fundraisings/${fundraising.id}`" class="card-link">
     <div class="card-wrapper text-left">
-      <img class="card-img" :src="require(`@/assets/img/rectangle.png`)" />
+      <img
+        class="card-img"
+        :src="`http://localhost:5000/images/${fundraising.image
+          ? fundraising.image : 'rectangle.png'}`"
+      />
       <div class="card-body">
         <h4>{{ getTitle }}</h4>
         <div>
