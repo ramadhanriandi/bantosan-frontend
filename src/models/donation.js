@@ -7,6 +7,7 @@ export default class Donation {
     status,
     createdAt,
     updatedAt,
+    proof,
   ) {
     this.nominal = nominal;
     this.status = status;
@@ -15,5 +16,6 @@ export default class Donation {
     this.donatur = donatur;
     this.bank = bank;
     this.fundraising = fundraising;
+    this.proof = proof;
   }
 }

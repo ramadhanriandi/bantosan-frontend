@@ -34,6 +34,8 @@ class AuthService {
     fullname: user.fullname,
     phone: user.phone,
     status: user.status,
+    avatar: user.avatar,
+    identity: user.identity,
   }, { headers: authHeader() })
 }
 

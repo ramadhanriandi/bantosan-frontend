@@ -33,14 +33,27 @@
       </div>
       <div class="col-12 col-sm-12 col-lg-3">
         <img
-          v-if="getUrl === 'edit'"
+          v-if="getUrl === 'edit' || (getUrl === 'create' && fundraising.image)"
           class="fundraising-img mb-3 w-100"
-          :src="require(`@/assets/img/rectangle.png`)"
+          :src="`http://localhost:5000/images/${fundraising.image
+            ? fundraising.image : 'rectangle.png'}`"
         />
         <div class="form-group">
           <label>Image</label>
+          <input
+            type="hidden"
+            class="form-control"
+            v-model="fundraising.image"
+            required
+          />
           <div class="custom-file">
-            <input type="file" class="custom-file-input" id="customFile">
+            <input
+              type="file"
+              class="custom-file-input"
+              id="customFile"
+              ref="file"
+              @change="sendFile"
+            >
             <label class="custom-file-label" for="customFile">Upload an image</label>
           </div>
         </div>
@@ -118,7 +131,9 @@
 </template>
 
 <script>
+import axios from 'axios';
 import utils from '@/assets/js/utils';
+import Configs from '../constants/config';
 import Fundraising from '../models/fundraising';
 import FundraisingService from '../services/fundraising.service';
 
@@ -162,6 +177,33 @@ export default {
     removeBank(index) {
       if (this.banks.length > 1) {
         this.banks.splice(index, 1);
+      }
+    },
+    async sendFile() {
+      this.message = '';
+
+      const image = this.$refs.file.files[0];
+      const formData = new FormData();
+      formData.append('file', image);
+
+      try {
+        const response = await axios.post(`${Configs.STATIC_SERVER_URL}/upload`, formData);
+        this.fundraising.image = response.data.file;
+        this.message = 'Image file uploaded';
+        this.$swal({
+          icon: 'success',
+          title: 'Success',
+          text: this.message,
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } catch (err) {
+        this.message = 'Failed to upload image file';
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.message,
+        });
       }
     },
     handleSubmit() {
@@ -219,7 +261,7 @@ export default {
               timer: 2000,
               timerProgressBar: true,
               onClose: () => {
-                this.$router.push(`/fundraising-list/${this.fundraising.id}`);
+                this.$router.push('/fundraising-list');
               },
             });
           },

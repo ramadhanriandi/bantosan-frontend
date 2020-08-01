@@ -11,6 +11,7 @@ export default class Fundraising {
     updatedAt,
     organizer,
     banks,
+    image,
   ) {
     this.title = title;
     this.description = description;
@@ -23,5 +24,6 @@ export default class Fundraising {
     this.updatedAt = updatedAt;
     this.organizer = organizer;
     this.banks = banks;
+    this.image = image;
   }
 }
