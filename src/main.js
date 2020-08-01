@@ -4,12 +4,15 @@ import { LMap, LTileLayer, LMarker } from 'vue2-leaflet';
 import { Icon } from 'leaflet';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import VueSweetalert2 from 'vue-sweetalert2';
 import App from './App.vue';
 import router from './router';
 import store from './store';
 import 'leaflet/dist/leaflet.css';
 
 Vue.config.productionTip = false;
+
+Vue.use(VueSweetalert2);
 
 Vue.component('l-map', LMap);
 Vue.component('l-tile-layer', LTileLayer);
@@ -23,8 +26,6 @@ Icon.Default.mergeOptions({
   iconUrl: require('leaflet/dist/images/marker-icon.png'),
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
-
-Vue.config.productionTip = false;
 
 new Vue({
   router,

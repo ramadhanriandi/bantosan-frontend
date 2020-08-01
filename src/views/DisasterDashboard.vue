@@ -9,7 +9,7 @@
       </div>
       <div
         class="col-12 col-sm-12 col-lg-6 d-flex justify-content-end"
-        v-if="getUser && getUser.role === 'Admin'"
+        v-if="isAdmin"
       >
         <div
           v-for="data in statuses"
@@ -23,7 +23,7 @@
       </div>
       <div
         class="col-12 col-sm-12 col-lg-6"
-        v-else-if="getUser && getUser.role === 'User'"
+        v-else-if="!isAdmin"
       >
         <div class="row px-3 d-flex justify-content-end">
           <router-link
@@ -44,8 +44,8 @@
               <th scope="col">Name</th>
               <th scope="col">Location</th>
               <th scope="col">Category</th>
-              <th scope="col" v-if="getUser && getUser.role === 'Admin'">Username</th>
-              <th scope="col" v-if="getUser && getUser.role === 'Admin'">Display</th>
+              <th scope="col" v-if="isAdmin">Username</th>
+              <th scope="col" v-if="isAdmin">Display</th>
               <th scope="col">Status</th>
               <th scope="col">Action</th>
             </tr>
@@ -56,28 +56,34 @@
               <td>{{ disaster.name }}</td>
               <td>{{ disaster.location.name }}</td>
               <td>{{ disaster.category }}</td>
-              <td v-if="getUser && getUser.role === 'Admin'">{{ disaster.createdBy.username }}</td>
-              <td v-if="getUser && getUser.role === 'Admin'">
+              <td v-if="isAdmin">{{ disaster && disaster.reporter.username }}</td>
+              <td v-if="isAdmin">
                 <div
                   v-if="disaster.status === 'Verified'"
                   class="btn-xs d-inline p-2 mr-1"
-                  :class="`btn-${getDisplayColor(disaster.display, 'Show')}-reverse
-                  btn-${getDisplayColor(disaster.display, 'Show')}-outline`"
+                  :class="`btn-${getDisplayColor(disaster && disaster.display, 'Show')}-reverse
+                  btn-${getDisplayColor(disaster && disaster.display, 'Show')}-outline`"
+                  @click="disaster.display !== 'Show'
+                    && updateDisaster(disaster, 'Show', null)"
                 >
                   Show
                 </div>
                 <div
                   v-if="disaster.status === 'Verified'"
                   class="btn-xs d-inline p-2"
-                  :class="`btn-${getDisplayColor(disaster.display, 'Hidden')}-reverse
-                  btn-${getDisplayColor(disaster.display, 'Hidden')}-outline`"
+                  :class="`btn-${getDisplayColor(disaster && disaster.display, 'Hidden')}-reverse
+                  btn-${getDisplayColor(disaster && disaster.display, 'Hidden')}-outline`"
+                  @click="disaster.display !== 'Hidden'
+                    && updateDisaster(disaster, 'Hidden', null)"
                 >
                   Hidden
                 </div>
                 <div v-if="disaster.status !== 'Verified'">-</div>
               </td>
               <td>
-                <div :class="`btn-xs btn-${getColor(disaster.status)} d-inline py-2 px-3`">
+                <div
+                  :class="`btn-xs btn-${getColor(disaster && disaster.status)} d-inline py-2 px-3`"
+                >
                   {{ disaster.status }}
                 </div>
               </td>
@@ -89,7 +95,7 @@
                   <img src="@/assets/img/view.png" />
                 </div>
                 <div
-                  v-if="getUser && getUser.role === 'User'"
+                  v-if="!isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2 mr-1"
                   :class="disaster.status === 'Pending' ? 'btn-purple' : 'btn-light-grey'"
                   @click="handleRedirect('edit', disaster)"
@@ -97,23 +103,28 @@
                   <img src="@/assets/img/edit.png" />
                 </div>
                 <div
-                  v-if="getUser && getUser.role === 'User'"
+                  v-if="!isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2"
                   :class="disaster.status === 'Verified' ? 'btn-light-grey' : 'btn-purple'"
+                  @click="disaster.status !== 'Verified' && deleteDisaster(disaster.id)"
                 >
                   <img src="@/assets/img/delete.png" />
                 </div>
                 <div
-                  v-if="getUser && getUser.role === 'Admin'"
+                  v-if="isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2 mr-1"
                   :class="disaster.status === 'Verified' ? 'btn-light-grey' : 'btn-green'"
+                  @click="disaster.status !== 'Verified'
+                    && updateDisaster(disaster, 'Show', 'Verified')"
                 >
                   <img src="@/assets/img/verify.png" />
                 </div>
                 <div
-                  v-if="getUser && getUser.role === 'Admin'"
+                  v-if="isAdmin"
                   class="btn-xs cursor-pointer d-inline p-2"
                   :class="disaster.status === 'Rejected' ? 'btn-light-grey' : 'btn-red'"
+                  @click="disaster.status !== 'Rejected'
+                    && updateDisaster(disaster, 'Hidden', 'Rejected')"
                 >
                   <img src="@/assets/img/unverify.png" />
                 </div>
@@ -136,13 +147,16 @@
 
 <script>
 import _ from 'lodash';
-import { mapGetters } from 'vuex';
 import vPagination from 'vue-plain-pagination';
 import utils from '@/assets/js/utils';
+import DisasterService from '../services/disaster.service';
 
 export default {
   components: { vPagination },
   computed: {
+    currentUser() {
+      return this.$store.state.auth.user;
+    },
     getDisasters() {
       const filteredDisasters = this.status === 'All Report'
         ? this.disasters
@@ -158,233 +172,26 @@ export default {
     getMaxPage() {
       return Math.ceil(this.getDisasters.count / this.limit);
     },
-    ...mapGetters([
-      'getUser',
-    ]),
+    isAdmin() {
+      return this.currentUser && this.currentUser.roles.includes('ROLE_ADMIN');
+    },
   },
-  data() {
-    return {
-      disasters: [
-        {
-          id: '1',
-          name: 'Banjir A',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-10, 125] },
-          },
-          status: 'Verified',
-          display: 'Show',
-          category: 'Flood',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt: '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '2',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-9, 120] },
-          },
-          status: 'Pending',
-          display: 'Hidden',
-          category: 'Flood',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt: '2013-07-14T01:00:00+01:00',
-        },
-        {
-          id: '3',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-8, 110] },
-          },
-          status: 'Pending',
-          display: 'Hidden',
-          category: 'Earthquake',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt: '2012-07-13T01:00:00+01:00',
-        },
-        {
-          id: '4',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-7, 115] },
-          },
-          status: 'Verified',
-          display: 'Hidden',
-          category: 'Tsunami',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt: '2020-05-13T01:00:00+01:00',
-        },
-        {
-          id: '5',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-1, 135] },
-          },
-          status: 'Verified',
-          display: 'Show',
-          category: 'Wildfire',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt: '2012-07-04T01:00:00+01:00',
-        },
-        {
-          id: '6',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [1, 100] },
-          },
-          status: 'Pending',
-          display: 'Show',
-          category:
-           'Wildfire',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '7',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [3, 95] },
-          },
-          status: 'Rejected',
-          display: 'Show',
-          category:
-           'Wildfire',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '8',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [2, 97] },
-          },
-          status: 'Rejected',
-          display: 'Show',
-          category:
-           'Wildfire',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '9',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [0, 120] },
-          },
-          status: 'Rejected',
-          display: 'Show',
-          category:
-           'Landslide',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '10',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [1, 110] },
-          },
-          status: 'Rejected',
-          display: 'Show',
-          category:
-           'Landslide',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '11',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [2, 127] },
-          },
-          status: 'Pending',
-          display: 'Show',
-          category:
-           'Volcano',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          createdBy: {
-            id: 'asdasfasfqwafw2',
-            username: 'your_username',
-          },
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-      ],
-      statuses: [
-        { name: 'All Report', color: 'grey' },
-        { name: 'Verified', color: 'green' },
-        { name: 'Pending', color: 'yellow' },
-        { name: 'Rejected', color: 'red' },
-      ],
-      limit: 10,
-      page: 1,
-      status: 'All Report',
-    };
-  },
+  data: () => ({
+    disasters: [],
+    statuses: [
+      { name: 'All Report', color: 'grey' },
+      { name: 'Verified', color: 'green' },
+      { name: 'Pending', color: 'yellow' },
+      { name: 'Rejected', color: 'red' },
+    ],
+    limit: 10,
+    message: '',
+    page: 1,
+    status: 'All Report',
+  }),
   methods: {
     getColor(status) {
-      return _.find(this.statuses, { name: status }).color;
+      return _.get(_.find(this.statuses, { name: status }), 'color');
     },
     getDisplayColor(disasterDisplay, display) {
       return disasterDisplay === display ? 'purple' : 'grey';
@@ -402,6 +209,84 @@ export default {
     setStatus(status) {
       this.status = status;
     },
+    updateDisaster(disaster, display, status) {
+      const updatedDisaster = {
+        ...disaster,
+        display: display || disaster.display,
+        status: status || disaster.status,
+      };
+
+      DisasterService.putDisaster(updatedDisaster.id, updatedDisaster).then(
+        () => {
+          this.message = 'The disaster report is updated';
+          this.$swal({
+            icon: 'success',
+            title: 'Success',
+            text: this.message,
+            timer: 2000,
+            timerProgressBar: true,
+            onClose: () => {
+              this.$router.go();
+            },
+          });
+        },
+        (error) => {
+          this.message = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.message,
+          });
+        },
+      );
+    },
+    deleteDisaster(id) {
+      DisasterService.deleteDisaster(id).then(
+        () => {
+          this.message = 'The disaster report is deleted';
+          this.$swal({
+            icon: 'success',
+            title: 'Success',
+            text: this.message,
+            timer: 2000,
+            timerProgressBar: true,
+            onClose: () => {
+              this.$router.go();
+            },
+          });
+        },
+        (error) => {
+          this.message = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.message,
+          });
+        },
+      );
+    },
+  },
+  mounted() {
+    let option = {};
+    if (!this.isAdmin) {
+      option = { userId: this.currentUser.id };
+    }
+    DisasterService.getAllDisasters(option).then(
+      (response) => {
+        this.disasters = response.data.content;
+      },
+      (error) => {
+        this.message = error.response.data.errorMessage
+              || error.response.data.status;
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.message,
+        });
+      },
+    );
   },
 };
 </script>

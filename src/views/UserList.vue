@@ -35,7 +35,7 @@
               <td>{{ user.username }}</td>
               <td v-if="user.identity">
                 <a
-                  :href="`/user-list/${user.id}/${user.identity}`"
+                  :href="`http://localhost:5000/images/${user.identity}`"
                   target="_blank"
                   class="btn-xs btn-grey py-2 px-3"
                 >
@@ -59,6 +59,8 @@
                   class="btn-xs cursor-pointer d-inline p-2 mr-1"
                   :class="user.status === 'Pending' || user.status === 'Rejected' ?
                   'btn-green' : 'btn-light-grey'"
+                  @click="(user.status === 'Pending' || user.status === 'Rejected')
+                    && updateUser(user, 'Verified')"
                 >
                   <img src="@/assets/img/verify.png" />
                 </div>
@@ -66,6 +68,8 @@
                   class="btn-xs cursor-pointer d-inline p-2"
                   :class="user.status === 'Verified' || user.status === 'Pending' ?
                   'btn-red' : 'btn-light-grey'"
+                  @click="(user.status === 'Verified' || user.status === 'Pending')
+                    && updateUser(user, 'Rejected')"
                 >
                   <img src="@/assets/img/unverify.png" />
                 </div>
@@ -89,6 +93,7 @@
 <script>
 import _ from 'lodash';
 import vPagination from 'vue-plain-pagination';
+import AuthService from '../services/auth.service';
 
 export default {
   components: { vPagination },
@@ -108,45 +113,23 @@ export default {
       return Math.ceil(this.getUsers.count / this.limit);
     },
   },
-  data() {
-    return {
-      users: [
-        {
-          id: 'asfaslfaslfbasldas1',
-          username: 'your_username',
-          identity: 'sadasdasasfas',
-          status: 'Verified',
-        }, {
-          id: 'asfaslfaslfbasldas2',
-          username: 'your_username',
-          identity: 'sadasdasasfas',
-          status: 'Pending',
-        }, {
-          id: 'asfaslfaslfbasldas2',
-          username: 'your_username',
-          identity: 'sadasdasasfas',
-          status: 'Rejected',
-        }, {
-          id: 'asfaslfaslfbasldas2',
-          username: 'your_username',
-          status: 'Unverified',
-        },
-      ],
-      statuses: [
-        { name: 'All User', color: 'grey' },
-        { name: 'Verified', color: 'green' },
-        { name: 'Pending', color: 'yellow' },
-        { name: 'Rejected', color: 'red' },
-        { name: 'Unverified', color: 'light-grey' },
-      ],
-      limit: 10,
-      page: 1,
-      status: 'All User',
-    };
-  },
+  data: () => ({
+    users: [],
+    statuses: [
+      { name: 'All User', color: 'grey' },
+      { name: 'Verified', color: 'green' },
+      { name: 'Pending', color: 'yellow' },
+      { name: 'Rejected', color: 'red' },
+      { name: 'Unverified', color: 'light-grey' },
+    ],
+    limit: 10,
+    page: 1,
+    status: 'All User',
+    message: '',
+  }),
   methods: {
     getColor(status) {
-      return _.find(this.statuses, { name: status }).color;
+      return _.get(_.find(this.statuses, { name: status }), 'color');
     },
     handleRedirect(userId) {
       this.$router.push(`/user-list/${userId}`);
@@ -154,6 +137,55 @@ export default {
     setStatus(status) {
       this.status = status;
     },
+    updateUser(user, status) {
+      const updatedUser = {
+        ...user,
+        status: status || user.status,
+      };
+
+      AuthService.updateUser(updatedUser.id, updatedUser).then(
+        () => {
+          this.message = status === 'Verified'
+            ? 'The user is verified'
+            : 'The user is rejected';
+          this.$swal({
+            icon: 'success',
+            title: 'Success',
+            text: this.message,
+            timer: 2000,
+            timerProgressBar: true,
+            onClose: () => {
+              this.$router.go();
+            },
+          });
+        },
+        (error) => {
+          this.message = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.message,
+          });
+        },
+      );
+    },
+  },
+  mounted() {
+    AuthService.getAllUsers().then(
+      (response) => {
+        this.users = response.data.content;
+      },
+      (error) => {
+        this.errorMessage = error.response.data.errorMessage
+              || error.response.data.status;
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.errorMessage,
+        });
+      },
+    );
   },
 };
 </script>

@@ -15,11 +15,13 @@ const convertDate = (date) => {
   return `${day} ${monthName} ${year}`;
 };
 
-const cutString = (string, maxLength) => (string.length > maxLength ? `${string.substring(0, maxLength)}...` : string);
+const cutString = (string, maxLength) => (string && string.length > maxLength ? `${string.substring(0, maxLength)}...` : string);
 
 const getDaysLeft = (date) => {
   const delta = date.getTime() - new Date().getTime();
-
+  if (delta < 0) {
+    return 0;
+  }
   return parseInt((delta / (1000 * 3600 * 24)), 10);
 };
 

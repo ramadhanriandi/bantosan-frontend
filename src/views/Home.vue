@@ -6,9 +6,13 @@
       </div>
       <div class="col-lg-3 text-left">
         <h1 class="header">
-          <span>{{ disasters.length }}</span> Disasters <br /> in Indonesia Currently
+          <span>
+            {{ disasters ? disasters.length : '0' }}
+          </span> Disasters <br /> in Indonesia Currently
         </h1>
-        <p v-if="disasters.length > 0" class="subtitle">Latest Update : {{ getLatestUpdate }}</p>
+        <p v-if="disasters && disasters.length > 0" class="subtitle">
+          Latest Update : {{ getLatestUpdate }}
+        </p>
         <div v-for="(count, title) in getSummary" :key="title">
           <SummaryItem
             :title="title"
@@ -43,7 +47,7 @@
       Want to raise a fund ?
       <router-link
         class="question-redirect"
-        :to="getUser && getUser.username ? '/fundraising-list/create' : '/login'"
+        :to="currentUser && currentUser.username ? '/fundraising-list/create' : '/login'"
       >
         Create it now
       </router-link>
@@ -53,11 +57,12 @@
 
 <script>
 import _ from 'lodash';
-import { mapGetters } from 'vuex';
 import utils from '@/assets/js/utils';
 import CardItem from '@/components/CardItem.vue';
 import DisasterMap from '@/components/DisasterMap.vue';
 import SummaryItem from '@/components/SummaryItem.vue';
+import DisasterService from '../services/disaster.service';
+import FundraisingService from '../services/fundraising.service';
 
 export default {
   components: {
@@ -66,6 +71,9 @@ export default {
     SummaryItem,
   },
   computed: {
+    currentUser() {
+      return this.$store.state.auth.user;
+    },
     getLatestUpdate() {
       const latest = new Date(Math.max.apply(null, this.disasters.map(e => new Date(e.updatedAt))));
 
@@ -82,110 +90,50 @@ export default {
 
       return counters;
     },
-    ...mapGetters([
-      'getUser',
-    ]),
   },
-  data() {
-    return {
-      summary: {
-        Flood: { foreground: 'blue', background: 'light-blue' },
-        Earthquake: { foreground: 'brown', background: 'light-brown' },
-        Tsunami: { foreground: 'purple', background: 'light-purple' },
-        Wildfire: { foreground: 'red', background: 'light-red' },
-        Landslide: { foreground: 'green', background: 'light-green' },
-        Volcano: { foreground: 'yellow', background: 'light-yellow' },
+  data: () => ({
+    summary: {
+      Flood: { foreground: 'blue', background: 'light-blue' },
+      Earthquake: { foreground: 'brown', background: 'light-brown' },
+      Tsunami: { foreground: 'purple', background: 'light-purple' },
+      Wildfire: { foreground: 'red', background: 'light-red' },
+      Landslide: { foreground: 'green', background: 'light-green' },
+      Volcano: { foreground: 'yellow', background: 'light-yellow' },
+    },
+    disasters: [],
+    fundraisings: [],
+    errorMessage: '',
+  }),
+  mounted() {
+    DisasterService.getAllDisasters({ display: 'Show' }).then(
+      (response) => {
+        this.disasters = response.data.content;
       },
-      disasters: [
-        {
-          id: '1', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-10, 125] } }, category: 'Flood', updatedAt: '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '2', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-9, 120] } }, category: 'Flood', updatedAt: '2013-07-14T01:00:00+01:00',
-        },
-        {
-          id: '3', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-8, 110] } }, category: 'Earthquake', updatedAt: '2012-07-13T01:00:00+01:00',
-        },
-        {
-          id: '4', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-7, 115] } }, category: 'Tsunami', updatedAt: '2020-05-13T01:00:00+01:00',
-        },
-        {
-          id: '5', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [-1, 135] } }, category: 'Wildfire', updatedAt: '2012-07-04T01:00:00+01:00',
-        },
-        {
-          id: '6', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [1, 100] } }, category: 'Wildfire', updatedAt: '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '7', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [3, 95] } }, category: 'Wildfire', updatedAt: '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '8', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [2, 97] } }, category: 'Wildfire', updatedAt: '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '9', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [0, 120] } }, category: 'Landslide', updatedAt: '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '10', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [1, 110] } }, category: 'Landslide', updatedAt: '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '11', name: 'Banjir Buahbatu', location: { name: 'Kec. Buahbatu, Bandung', map: { coordinates: [2, 127] } }, category: 'Volcano', updatedAt: '2012-07-14T01:00:00+01:00',
-        },
-      ],
-      fundraisings: [
-        {
-          id: 'abcdef1',
-          title: 'Bantuan Kemanusiaan Tsunami Aceh',
-          image: 'rectangle.png',
-          target: 40000000000,
-          endDate: '2020-09-14T01:00:00+01:00',
-          createdBy: {
-            id: 'sdasfasdas',
-            username: 'dwi_handayani',
-            fullname: 'Dwi Handayani',
-          },
-          totalDonation: 26812345000,
-        },
-        {
-          id: 'abcdef2',
-          title: 'Korban Banjir Lengkeka Poso Butuh Bantuan',
-          image: 'rectangle.png',
-          target: 50000000,
-          endDate: '2020-07-07T01:00:00+01:00',
-          createdBy: {
-            id: 'sdasfasda1',
-            username: 'act_sulteng',
-            fullname: 'Aksi Cepat Tanggap Sulawesi Tengah',
-          },
-          totalDonation: 17295123,
-        },
-        {
-          id: 'abcdef3',
-          title: 'Bantu Korban Banjir Jawa Barat dan Banten',
-          image: 'rectangle.png',
-          target: 50000000,
-          endDate: '2020-08-07T01:00:00+01:00',
-          createdBy: {
-            id: 'sdasfasda2',
-            username: 'act',
-            fullname: 'Aksi Cepat Tanggap',
-          },
-          totalDonation: 20296131,
-        },
-        {
-          id: 'abcdef4',
-          title: 'Bantu Korban Bencana Indonesia',
-          image: 'rectangle.png',
-          target: 200000000,
-          endDate: '2020-11-01T01:00:00+01:00',
-          createdBy: {
-            id: 'sdasfasda3',
-            username: 'baznas',
-            fullname: 'Badan Amil Zakat Nasional',
-          },
-          totalDonation: 30158212,
-        },
-      ],
-    };
+      (error) => {
+        this.errorMessage = error.response.data.errorMessage
+              || error.response.data.status;
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.errorMessage,
+        });
+      },
+    );
+
+    FundraisingService.getAllFundraisings({ limit: 4, status: 'Ongoing' }).then(
+      (response) => {
+        this.fundraisings = response.data.content;
+      },
+      (error) => {
+        this.errorMessage = error.response.data.errorMessage
+              || error.response.data.status;
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.errorMessage,
+        });
+      },
+    );
   },
 };
 </script>

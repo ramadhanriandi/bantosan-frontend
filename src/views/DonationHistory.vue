@@ -49,10 +49,14 @@
 import _ from 'lodash';
 import vPagination from 'vue-plain-pagination';
 import utils from '@/assets/js/utils';
+import DonationService from '../services/donation.service';
 
 export default {
   components: { vPagination },
   computed: {
+    currentUser() {
+      return this.$store.state.auth.user;
+    },
     getDonations() {
       const firstBound = this.limit * (this.page - 1);
       const lastBound = firstBound + this.limit;
@@ -66,57 +70,16 @@ export default {
       return Math.ceil(this.getDonations.count / this.limit);
     },
   },
-  data() {
-    return {
-      donations: [{
-        id: 'asfaslfaslfbaslda1s',
-        nominal: 10000.00,
-        proof: 'asfjasasdasdafasfjwoqjfa;',
-        status: 'Verified',
-        createdAt: '2020-08-07T01:00:00+01:00',
-        createdBy: {
-          id: 'asdasfasfqwafw2',
-          username: 'your_username',
-        },
-        fundraising: {
-          title: 'Bantuan Banjir Palu',
-        },
-      }, {
-        id: 'asfaslfaslfbasldas2',
-        nominal: 10000.00,
-        proof: 'asfjasasdasdafasfjwoqjfa;',
-        status: 'Pending',
-        createdAt: '2020-08-07T01:00:00+01:00',
-        createdBy: {
-          id: 'asdasfasfqwafw2',
-          username: 'your_username',
-        },
-        fundraising: {
-          title: 'Bantuan Banjir Palu',
-        },
-      }, {
-        id: 'asfaslfaslfbasldas3',
-        nominal: 10000.00,
-        proof: 'asfjasasdasdafasfjwoqjfa;',
-        status: 'Rejected',
-        createdAt: '2020-08-07T01:00:00+01:00',
-        createdBy: {
-          id: 'asdasfasfqwafw2',
-          username: 'your_username',
-        },
-        fundraising: {
-          title: 'Bantuan Banjir Palu',
-        },
-      }],
-      statuses: [
-        { name: 'Verified', color: 'green' },
-        { name: 'Pending', color: 'yellow' },
-        { name: 'Rejected', color: 'red' },
-      ],
-      limit: 10,
-      page: 1,
-    };
-  },
+  data: () => ({
+    donations: [],
+    statuses: [
+      { name: 'Verified', color: 'green' },
+      { name: 'Pending', color: 'yellow' },
+      { name: 'Rejected', color: 'red' },
+    ],
+    limit: 10,
+    page: 1,
+  }),
   methods: {
     convertCurrency(nominal) {
       return utils.convertCurrency(nominal);
@@ -130,6 +93,22 @@ export default {
     getColor(status) {
       return _.find(this.statuses, { name: status }).color;
     },
+  },
+  mounted() {
+    DonationService.getAllDonations({ userId: this.currentUser.id }).then(
+      (response) => {
+        this.donations = response.data.content;
+      },
+      (error) => {
+        this.errorMessage = error.response.data.errorMessage
+              || error.response.data.status;
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.errorMessage,
+        });
+      },
+    );
   },
 };
 </script>

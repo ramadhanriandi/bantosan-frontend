@@ -29,21 +29,28 @@
           Fundraisings
         </router-link>
       </ul>
-      <div v-if="getUser && getUser.username" class="nav-item dropdown">
+      <div v-if="getCurrentUser && getCurrentUser.username" class="nav-item dropdown">
         <div
-          class="nav-link dropdown-toggle"
+          class="nav-link dropdown-toggle nav-avatar"
           id="navbarDropdown"
           role="button"
           data-toggle="dropdown"
           aria-haspopup="true"
           aria-expanded="false"
         >
-          <img class="img-avatar" src="@/assets/img/small-avatar.png" />
-          {{ getUser.username }}
+          <div class="img-avatar">
+            <img
+              :src="`http://localhost:5000/images/${user.avatar ? user.avatar : 'small-avatar.png'}`"
+            />
+          </div>
+          {{ getCurrentUser.username }}
         </div>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
           <div class="dropdown-header">Menus</div>
-          <div v-for="menu in dropdown.menus[`${getUser.role.toLowerCase()}`]" :key="menu.name">
+          <div
+            v-for="menu in dropdown.menus[`${getDropdownMenu}`]"
+            :key="menu.name"
+          >
             <router-link class="dropdown-item" :to="menu.link">
               <img class="img-menu" :src="require('@/assets/img/' + menu.img)" />
               {{ menu.name }}
@@ -58,10 +65,10 @@
             </router-link>
           </div>
           <div class="dropdown-divider"></div>
-          <router-link class="dropdown-item" :to="dropdown.logout.link">
+          <div class="dropdown-item" @click.prevent="logOut">
             <img class="img-menu" :src="require('@/assets/img/' + dropdown.logout.img)" />
             {{ dropdown.logout.name }}
-          </router-link>
+          </div>
         </div>
       </div>
       <router-link v-else to="/login">
@@ -72,7 +79,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import AuthService from '../services/auth.service';
 
 export default {
   name: 'Navbar',
@@ -80,32 +87,63 @@ export default {
     getActiveMenu() {
       return this.$route.path.split('/')[1];
     },
-    ...mapGetters([
-      'getUser',
-    ]),
+    getCurrentUser() {
+      return this.$store.state.auth.user;
+    },
+    getDropdownMenu() {
+      return this.getCurrentUser.roles.includes('ROLE_ADMIN') ? 'admin' : 'user';
+    },
+    loggedIn() {
+      return this.$store.state.auth.status.loggedIn;
+    },
   },
-  data() {
-    return {
-      dropdown: {
-        menus: {
-          admin: [
-            { name: 'Reported Disaster', img: 'menu-disaster.png', link: '/reported-disasters' },
-            { name: 'Fundraising List', img: 'menu-fundraising.png', link: '/fundraising-list' },
-            { name: 'User List', img: 'menu-user.png', link: '/user-list' },
-          ],
-          user: [
-            { name: 'Reported Disaster', img: 'menu-disaster.png', link: '/reported-disasters' },
-            { name: 'Your Fundraising', img: 'menu-fundraising.png', link: '/fundraising-list' },
-            { name: 'Donation History', img: 'menu-donation.png', link: '/donation-history' },
-          ],
-        },
-        account: [
-          { name: 'Profile', img: 'menu-profile.png', link: '/profile' },
-          { name: 'Change Password', img: 'menu-password.png', link: '/change-password' },
+  data: () => ({
+    dropdown: {
+      menus: {
+        admin: [
+          { name: 'Reported Disaster', img: 'menu-disaster.png', link: '/reported-disasters' },
+          { name: 'Fundraising List', img: 'menu-fundraising.png', link: '/fundraising-list' },
+          { name: 'User List', img: 'menu-user.png', link: '/user-list' },
         ],
-        logout: { name: 'Logout', img: 'menu-logout.png', link: '/login' },
+        user: [
+          { name: 'Reported Disaster', img: 'menu-disaster.png', link: '/reported-disasters' },
+          { name: 'Your Fundraising', img: 'menu-fundraising.png', link: '/fundraising-list' },
+          { name: 'Donation History', img: 'menu-donation.png', link: '/donation-history' },
+        ],
       },
-    };
+      account: [
+        { name: 'Profile', img: 'menu-profile.png', link: '/profile' },
+        { name: 'Change Password', img: 'menu-password.png', link: '/change-password' },
+      ],
+      logout: { name: 'Logout', img: 'menu-logout.png', link: '/login' },
+    },
+    user: {
+      avatar: null,
+    },
+  }),
+  methods: {
+    logOut() {
+      this.$store.dispatch('auth/logout');
+      this.$router.go('/');
+    },
+  },
+  mounted() {
+    if (this.$store.state.auth.user) {
+      AuthService.getUserById(this.$store.state.auth.user.id).then(
+        (response) => {
+          this.user = response.data.value;
+        },
+        (error) => {
+          this.errorMessage = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.errorMessage,
+          });
+        },
+      );
+    }
   },
 };
 </script>
@@ -136,14 +174,33 @@ nav {
   color: $BLACK;
 }
 
+.dropdown-item:hover {
+  cursor: pointer;
+}
+
 .img-avatar {
-  height: 36px;
+  border-radius: 50%;
+  display: inline-block;
   margin-right: 12px;
+  max-height: 36px;
+  max-width: 36px;
+  overflow: hidden;
+  position: relative;
+}
+
+.img-avatar {
+  height: 100%;
+  width: auto;
 }
 
 .img-menu {
   height: 20px;
   margin-right: 8px;
+}
+
+.nav-avatar {
+  display: flex;
+  align-items: center;
 }
 
 .nav-item, .nav-item:hover {

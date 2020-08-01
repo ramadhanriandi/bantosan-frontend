@@ -3,13 +3,16 @@
     <div class="row mb-5">
       <div class="col-12 col-sm-12 col-lg-1 mb-4 mb-sm-4 mb-lg-0 text-left">
         <router-link
-          :to="getUser && getUser.username ? '/fundraising-list' : '/fundraisings'"
+          :to="loggedIn ? '/fundraising-list' : '/fundraisings'"
         >
           <img src="@/assets/img/back.png" />
         </router-link>
       </div>
       <div class="col-12 col-sm-12 col-lg-4 mb-4 mb-sm-4 mb-lg-0">
-        <img class="fundraising-img w-100" :src="require(`@/assets/img/${fundraising.image}`)" />
+        <img
+          class="fundraising-img w-100"
+          :src="`http://localhost:5000/images/${fundraising.image ? fundraising.image : 'rectangle.png'}`"
+        />
       </div>
       <div class="col-12 col-sm-12 col-lg-7 text-left">
         <h2 class="title mb-3">{{ fundraising.title }}</h2>
@@ -24,7 +27,7 @@
           bg-color="#F4C403"
           color="#7F51DF"
           :line-height="4"
-          :percent="getPercentage"
+          :percent="fundraising.totalDonation && fundraising.target ? getPercentage : 0"
           :show-text="false"
         />
         <div class="d-flex fundraising-count justify-content-between mb-2">
@@ -52,16 +55,16 @@
         <div v-if="getUrl === 'fundraisings'" class="d-flex justify-content-between">
           <div class="fundraising-user m-0">
             Organized by
-            <img class="ml-1" :src="require(`@/assets/img/${fundraising.createdBy.avatar}`)" />
+            <img class="ml-1" :src="require(`@/assets/img/small-avatar.png`)" />
             <span class="ml-1">
               {{ getFullname }} <img class="ml-1" src="@/assets/img/verified.png" />
             </span>
           </div>
           <button
-            v-if="getUser && getUser.role !== 'Admin'"
+            v-if="!isAdmin"
             class="btn btn-green px-3"
             @click="handleModal"
-            :data-toggle="getUser && getUser.username ? 'modal' : ''"
+            :data-toggle="loggedIn ? 'modal' : ''"
             data-target="#donation-modal"
           >
             DONATE NOW
@@ -70,7 +73,13 @@
       </div>
     </div>
 
-    <div class="row" v-if="getUrl === 'fundraising-list'">
+    <!-- Donation Table -->
+    <div
+      class="row"
+      v-if="getUrl === 'fundraising-list'
+        && fundraising && fundraising.organizer
+        && currentUser.id === fundraising.organizer.id"
+    >
       <div class="col-11 offset-1 pr-0">
         <div class="d-flex align-items-center mb-4 row">
           <div class="col-12 col-sm-12 col-lg-6">
@@ -96,40 +105,46 @@
                   <th scope="col">Date</th>
                   <th scope="col">Username</th>
                   <th scope="col">Donation</th>
-                  <th scope="col" v-if="getUser && getUser.role !== 'Admin'">Proof</th>
+                  <th scope="col" v-if="!isAdmin">Proof</th>
                   <th scope="col">Status</th>
-                  <th scope="col" v-if="getUser && getUser.role !== 'Admin'">Action</th>
+                  <th scope="col" v-if="!isAdmin">Action</th>
                 </tr>
               </thead>
               <tbody v-for="donation in getDonations.data" :key="donation.id">
                 <tr>
                   <td>{{ convertDate(donation.createdAt) }}</td>
-                  <td>{{ donation.createdBy.username }}</td>
+                  <td>{{ donation.donatur.username }}</td>
                   <td>IDR {{ convertCurrency(donation.nominal) }}</td>
-                  <td v-if="getUser && getUser.role !== 'Admin'">
+                  <td v-if="!isAdmin">
                     <a
-                      :href="`/fundraising-list/${fundraising.id}/${donation.proof}`"
+                      :href="`http://localhost:5000/images/${donation.proof}`"
                       target="_blank"
                       class="btn-xs btn-grey py-2 px-3"
+                      v-if="donation.proof"
                     >
                       View File
                     </a>
+                    <p v-else>-</p>
                   </td>
                   <td>
                     <div :class="`btn-xs btn-${getColor(donation.status)} d-inline py-2 px-3`">
                       {{ donation.status }}
                     </div>
                   </td>
-                  <td v-if="getUser && getUser.role !== 'Admin'">
+                  <td v-if="currentUser && currentUser.role !== 'Admin'">
                     <div
                       class="btn-xs cursor-pointer d-inline p-2 mr-1"
                       :class="donation.status === 'Verified' ? 'btn-light-grey' : 'btn-green'"
+                      @click="donation.status !== 'Verified'
+                        && putDonation(donation.id, 'Verified')"
                     >
                       <img src="@/assets/img/verify.png" />
                     </div>
                     <div
                       class="btn-xs cursor-pointer d-inline p-2"
                       :class="donation.status === 'Rejected' ? 'btn-light-grey' : 'btn-red'"
+                      @click="donation.status !== 'Rejected'
+                        && putDonation(donation.id, 'Rejected')"
                     >
                       <img src="@/assets/img/unverify.png" />
                     </div>
@@ -150,6 +165,7 @@
       </div>
     </div>
 
+    <!-- Donation Modal -->
     <div
       class="modal fade"
       id="donation-modal"
@@ -164,7 +180,7 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
-            <form class="text-left mt-3" @submit="submitForm" method="post">
+            <form class="text-left mt-3" @submit.prevent="postDonation" method="post">
               <div class="form-group">
                 <label>Nominal</label>
                 <div class="input-group">
@@ -173,7 +189,8 @@
                   </div>
                   <input
                     type="number"
-                    v-model="nominal"
+                    v-model="donation.nominal"
+                    name="nominal"
                     class="form-control p-3"
                     placeholder="min : 10,000"
                     min="10000"
@@ -187,13 +204,13 @@
                   class="form-check mb-2"
                   v-for="bank in fundraising.banks"
                   :key="bank.bankId"
-                  aria-describedby="bankHelp"
                 >
                   <input
                     class="form-check-input"
                     type="radio"
+                    name="bank"
                     :id="`bank${bank.bankId}`"
-                    v-model="bankId"
+                    v-model="donation.bank"
                     :value="bank.bankId"
                     required
                   >
@@ -201,18 +218,23 @@
                     {{ bank.name }} - {{ bank.accountNumber }} - {{ bank.accountHolder }}
                   </label>
                 </div>
-                <small
-                  v-if="errors && errors.bank"
-                  id="bankHelp"
-                  class="form-text"
-                >
-                  {{ errors.bank }}
-                </small>
               </div>
               <div class="form-group">
                 <label>Upload Transaction Proof</label>
                 <div class="custom-file">
-                  <input type="file" class="custom-file-input" id="customFile">
+                  <input
+                    type="hidden"
+                    class="form-control"
+                    v-model="donation.proof"
+                    required
+                  />
+                  <input
+                    type="file"
+                    class="custom-file-input"
+                    id="customFile"
+                    ref="file"
+                    @change="sendFile"
+                  >
                   <label class="custom-file-label" for="customFile">Choose file</label>
                 </div>
               </div>
@@ -226,11 +248,16 @@
 </template>
 
 <script>
+import axios from 'axios';
 import KProgress from 'k-progress';
 import _ from 'lodash';
-import { mapGetters } from 'vuex';
 import vPagination from 'vue-plain-pagination';
 import utils from '@/assets/js/utils';
+import Configs from '../constants/config';
+import Donation from '../models/donation';
+import DonationService from '../services/donation.service';
+import Fundraising from '../models/fundraising';
+import FundraisingService from '../services/fundraising.service';
 
 export default {
   components: {
@@ -238,11 +265,14 @@ export default {
     vPagination,
   },
   computed: {
+    currentUser() {
+      return this.$store.state.auth.user;
+    },
     getDaysLeft() {
       return utils.getDaysLeft(new Date(this.fundraising.endDate));
     },
     getDonation() {
-      return utils.convertCurrency(this.fundraising.totalDonation);
+      return utils.convertCurrency(_.get(this.fundraising, 'totalDonation', 0));
     },
     getDonations() {
       const filteredDonations = this.status === 'All Donation'
@@ -257,104 +287,46 @@ export default {
       };
     },
     getFullname() {
-      return utils.cutString(this.fundraising.createdBy.fullname, 31);
+      return utils.cutString(_.get(this.fundraising, ['organizer', 'fullname'], ''), 31);
     },
     getMaxPage() {
       return Math.ceil(this.getDonations.count / this.limit);
     },
     getPercentage() {
-      const { totalDonation, target } = this.fundraising;
+      const { totalDonation = 0, target = 0 } = this.fundraising;
 
       return utils.getPercentage(totalDonation, target);
     },
     getTarget() {
-      return utils.convertCurrency(this.fundraising.target);
+      return utils.convertCurrency(this.fundraising.target ? this.fundraising.target : 0);
     },
     getUrl() {
       return this.$route.path.split('/')[1];
     },
-    ...mapGetters([
-      'getUser',
-    ]),
+    loggedIn() {
+      return this.$store.state.auth.status.loggedIn;
+    },
+    isAdmin() {
+      return this.currentUser && this.currentUser.roles.includes('ROLE_ADMIN');
+    },
   },
-  data() {
-    return {
-      fundraising: {
-        id: 'abcdef1',
-        title: 'Bantuan Kemanusiaan Tsunami Aceh',
-        image: 'rectangle.png',
-        description: 'Pengungsi Masih Terlunta, Ayo Bangun Lebak Kembali! Sebanyak 6 kecamatan yang meliputi 30 desa di Kabupaten Lebak terdampak banjir. Qadarullah, kejadian itu juga menyebabkan 10 orang meninggal dunia dan 67 orang luka-luka. Selain korban jiwa, sebanyak 16 sekolah juga mengalami kerusakan serta 1.253 siswa terdampak. Banjir itu juga menerjang 18 pesantren, 28 jembatan, 5 jaringan irigasi, dan hampir seribu hektar sawah warga. Dan, sebanyak 3.041 unit rumah mengalami kerusakan yang menyebabkan ribuan warga harus mengungsi karena banyak dari mereka yang rumahnya tak layak dihuni lagi.',
-        target: 40000000000,
-        endDate: '2020-09-14T01:00:00+01:00',
-        createdBy: {
-          id: 'sdasfasdas',
-          username: 'dwi_handayani',
-          fullname: 'Dwi Handayani',
-          avatar: 'small-avatar.png',
-        },
-        banks: [{
-          bankId: 0,
-          name: 'BNI',
-          accountNumber: '1241241241',
-          accountHolder: 'Any Name Here',
-        }, {
-          bankId: 1,
-          name: 'BRI',
-          accountNumber: '1241241241',
-          accountHolder: 'Any Name Here',
-        }],
-        totalDonation: 26812345000,
-        donationByBank: [{
-          bankId: 0,
-          total: 241241231,
-        }, {
-          bankId: 1,
-          total: 225124141,
-        }],
-        donaturs: 403,
-      },
-      donations: [{
-        id: 'donation1',
-        nominal: 10000,
-        proof: 'donation1',
-        status: 'Pending',
-        createdAt: '2020-09-14T01:00:00+01:00',
-        createdBy: {
-          id: 'asdasfasfqwafw2',
-          username: 'your_username',
-        },
-        fundraising: {
-          title: 'Bantuan Banjir Palu',
-        },
-      }, {
-        id: 'donation2',
-        nominal: 10000,
-        proof: 'donation2',
-        status: 'Rejected',
-        createdAt: '2020-09-14T01:00:00+01:00',
-        createdBy: {
-          id: 'asdasfasfqwafw2',
-          username: 'your_username',
-        },
-        fundraising: {
-          title: 'Bantuan Banjir Palu',
-        },
-      }],
-      statuses: [
-        { name: 'All Donation', color: 'grey' },
-        { name: 'Verified', color: 'green' },
-        { name: 'Pending', color: 'yellow' },
-        { name: 'Rejected', color: 'red' },
-      ],
-      status: 'All Donation',
-      errors: {},
-      nominal: null,
-      bankId: null,
-      proof: null,
-      limit: 10,
-      page: 1,
-    };
-  },
+  data: () => ({
+    donation: new Donation('', '', '', ''),
+    proof: null,
+    donations: [],
+    fundraising: new Fundraising(),
+    statuses: [
+      { name: 'All Donation', color: 'grey' },
+      { name: 'Verified', color: 'green' },
+      { name: 'Pending', color: 'yellow' },
+      { name: 'Rejected', color: 'red' },
+    ],
+    status: 'All Donation',
+    errors: {},
+    message: '',
+    limit: 10,
+    page: 1,
+  }),
   methods: {
     convertCurrency(nominal) {
       return utils.convertCurrency(nominal);
@@ -370,28 +342,141 @@ export default {
       return _.find(this.statuses, { name: status }).color;
     },
     handleModal() {
-      if (this.getUser && !this.getUser.username) {
-        this.$router.push({ name: 'login' });
+      if (!this.loggedIn) {
+        this.$router.push('/login');
       }
     },
     setStatus(status) {
       this.status = status;
     },
-    submitForm(e) {
+    postDonation() {
+      this.message = '';
       this.errors = {};
 
-      if (!this.bankId) {
+      if (_.isNil(this.donation.bank)) {
         this.errors.bank = 'Choose a bank';
       }
 
-      if (_.isEmpty(this.errors) && this.nominal) {
-        return true;
+      if (_.isEmpty(this.errors)) {
+        this.donation = {
+          ...this.donation,
+          donatur: this.currentUser.id,
+          fundraising: this.fundraising.id,
+        };
+
+        DonationService.postDonation(this.donation).then(
+          () => {
+            this.message = 'Your donation is success';
+            this.$swal({
+              icon: 'success',
+              title: 'Success',
+              text: this.message,
+              timer: 2000,
+              timerProgressBar: true,
+              onClose: () => {
+                this.$router.go(`/fundraisings/${this.fundraising.id}`);
+              },
+            });
+          },
+          (error) => {
+            this.message = error.response.data.errorMessage
+              || error.response.data.status;
+            this.$swal({
+              icon: 'error',
+              title: 'Oops...',
+              text: this.message,
+            });
+          },
+        );
       }
-
-      e.preventDefault();
-
-      return false;
     },
+    putDonation(donationId, status) {
+      this.message = '';
+
+      DonationService.putDonation(donationId, status).then(
+        () => {
+          this.message = status === 'Verified'
+            ? 'The donation is verified'
+            : 'The donation is rejected';
+          this.$swal({
+            icon: 'success',
+            title: 'Success',
+            text: this.message,
+            timer: 2000,
+            timerProgressBar: true,
+            onClose: () => {
+              this.$router.go(`/fundraisings/${this.fundraising.id}`);
+            },
+          });
+        },
+        (error) => {
+          this.message = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.message,
+          });
+        },
+      );
+    },
+    async sendFile() {
+      this.message = '';
+
+      const image = this.$refs.file.files[0];
+      const formData = new FormData();
+      formData.append('file', image);
+
+      try {
+        const response = await axios.post(`${Configs.STATIC_SERVER_URL}/upload`, formData);
+        this.donation.proof = response.data.file;
+        this.message = 'Image file uploaded';
+        this.$swal({
+          icon: 'success',
+          title: 'Success',
+          text: this.message,
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } catch (err) {
+        this.message = 'Failed to upload image file';
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.message,
+        });
+      }
+    },
+  },
+  mounted() {
+    FundraisingService.getFundraisingById(this.$route.path.split('/')[2]).then(
+      (fundraisingResponse) => {
+        this.fundraising = fundraisingResponse.data.value;
+        DonationService.getAllDonations({ fundraisingId: this.fundraising.id }).then(
+          (donationResponse) => {
+            this.donations = donationResponse.data.content;
+          },
+          (error) => {
+            this.errorMessage = error.response.data.errorMessage
+                  || error.response.data.status;
+            this.$swal({
+              icon: 'error',
+              title: 'Oops...',
+              text: this.errorMessage,
+            });
+          },
+        );
+      },
+      (error) => {
+        this.message = error.response.data.errorMessage
+              || error.response.data.status;
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.message,
+        });
+      },
+    );
   },
 };
 </script>

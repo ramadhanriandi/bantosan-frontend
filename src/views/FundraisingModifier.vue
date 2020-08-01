@@ -9,7 +9,7 @@
         <p class="subtitle">{{ getSubtitle }}</p>
       </div>
     </div>
-    <form class="row text-left" @submit="submitForm" method="post">
+    <form class="row text-left" @submit.prevent="handleSubmit" method="post">
       <div class="col-12 col-sm-12 col-lg-4 offset-0 offset-sm-0 offset-lg-1">
         <div class="form-group">
           <label>Title</label>
@@ -33,14 +33,27 @@
       </div>
       <div class="col-12 col-sm-12 col-lg-3">
         <img
-          v-if="getUrl === 'edit'"
+          v-if="getUrl === 'edit' || (getUrl === 'create' && fundraising.image)"
           class="fundraising-img mb-3 w-100"
-          :src="require(`@/assets/img/${fundraising.image}`)"
+          :src="`http://localhost:5000/images/${fundraising.image
+            ? fundraising.image : 'rectangle.png'}`"
         />
         <div class="form-group">
           <label>Image</label>
+          <input
+            type="hidden"
+            class="form-control"
+            v-model="fundraising.image"
+            required
+          />
           <div class="custom-file">
-            <input type="file" class="custom-file-input" id="customFile">
+            <input
+              type="file"
+              class="custom-file-input"
+              id="customFile"
+              ref="file"
+              @change="sendFile"
+            >
             <label class="custom-file-label" for="customFile">Upload an image</label>
           </div>
         </div>
@@ -72,7 +85,7 @@
         </div>
       </div>
       <div class="col-12 col-sm-12 col-lg-4">
-        <div v-for="(bank, index) in fundraising.banks" :key="index" class="card p-3 mb-3">
+        <div v-for="(bank, index) in banks" :key="index" class="card p-3 mb-3">
           <div class="form-row">
             <div class="form-group col-4">
               <label>Bank</label>
@@ -118,7 +131,11 @@
 </template>
 
 <script>
+import axios from 'axios';
 import utils from '@/assets/js/utils';
+import Configs from '../constants/config';
+import Fundraising from '../models/fundraising';
+import FundraisingService from '../services/fundraising.service';
 
 export default {
   computed: {
@@ -130,44 +147,27 @@ export default {
     },
     getSubtitle() {
       return this.getUrl === 'create'
-        ? 'Fill in the form below to create a fundraising' : `Latest Update : ${this.convertDate(this.fundraising.updatedAt)}`;
+        ? 'Fill in the form below to create a fundraising'
+        : `Latest Update : ${this.convertDate(this.fundraising.updatedAt)}`;
     },
     getUrl() {
       const parsedUrl = this.$route.path.split('/');
       return parsedUrl[parsedUrl.length - 1];
     },
   },
-  data() {
-    return {
-      fundraising: {
-        id: 'abcdef1',
-        title: 'Bantuan Kemanusiaan Tsunami Aceh',
-        image: 'rectangle.png',
-        description: 'Pengungsi Masih Terlunta, Ayo Bangun Lebak Kembali! Sebanyak 6 kecamatan yang meliputi 30 desa di Kabupaten Lebak terdampak banjir. Qadarullah, kejadian itu juga menyebabkan 10 orang meninggal dunia dan 67 orang luka-luka. Selain korban jiwa, sebanyak 16 sekolah juga mengalami kerusakan serta 1.253 siswa terdampak. Banjir itu juga menerjang 18 pesantren, 28 jembatan, 5 jaringan irigasi, dan hampir seribu hektar sawah warga. Dan, sebanyak 3.041 unit rumah mengalami kerusakan yang menyebabkan ribuan warga harus mengungsi karena banyak dari mereka yang rumahnya tak layak dihuni lagi.',
-        target: 40000000000,
-        updatedAt: '2020-09-14T01:00:00+01:00',
-        day: 100,
-        banks: [{
-          bankId: 0,
-          name: 'BNI',
-          accountNumber: '1241241241',
-          accountHolder: 'Any Name Here',
-        }, {
-          bankId: 1,
-          name: 'BRI',
-          accountNumber: '1241241241',
-          accountHolder: 'Any Name Here',
-        }],
-      },
-    };
-  },
+  data: () => ({
+    banks: [],
+    fundraising: new Fundraising(),
+    message: '',
+  }),
   methods: {
     addBank() {
-      if (this.fundraising.banks.length < 3) {
-        this.fundraising.banks.push({
+      if (this.banks.length < 3) {
+        this.banks.push({
           name: null,
           accountNumber: null,
           accountHolder: null,
+          bankId: this.banks.length,
         });
       }
     },
@@ -175,23 +175,135 @@ export default {
       return utils.convertDate(new Date(date));
     },
     removeBank(index) {
-      if (this.fundraising.banks.length > 1) {
-        this.fundraising.banks.splice(index, 1);
+      if (this.banks.length > 1) {
+        this.banks.splice(index, 1);
       }
     },
-    submitForm(e) {
-      const {
-        title, description, days, target,
-      } = this.fundraising;
+    async sendFile() {
+      this.message = '';
 
-      if (title && description && days && target) {
-        return true;
+      const image = this.$refs.file.files[0];
+      const formData = new FormData();
+      formData.append('file', image);
+
+      try {
+        const response = await axios.post(`${Configs.STATIC_SERVER_URL}/upload`, formData);
+        this.fundraising.image = response.data.file;
+        this.message = 'Image file uploaded';
+        this.$swal({
+          icon: 'success',
+          title: 'Success',
+          text: this.message,
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } catch (err) {
+        this.message = 'Failed to upload image file';
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.message,
+        });
       }
-
-      e.preventDefault();
-
-      return false;
     },
+    handleSubmit() {
+      this.message = '';
+
+      if (this.getUrl === 'create') {
+        this.fundraising = {
+          ...this.fundraising,
+          banks: this.banks,
+          organizer: this.$store.state.auth.user.id,
+        };
+
+        FundraisingService.postFundraising(this.fundraising).then(
+          (response) => {
+            const { success, errorMessage } = response.data;
+            if (success) {
+              this.message = 'Your fundraising submission is success';
+              this.$swal({
+                icon: 'success',
+                title: 'Success',
+                text: this.message,
+                timer: 2000,
+                timerProgressBar: true,
+                onClose: () => {
+                  this.$router.push('/fundraising-list');
+                },
+              });
+            } else {
+              this.message = errorMessage;
+              this.$swal({
+                icon: 'error',
+                title: 'Oops...',
+                text: this.message,
+              });
+            }
+          },
+          (error) => {
+            this.message = error.response.data.errorMessage
+              || error.response.data.status;
+            this.$swal({
+              icon: 'error',
+              title: 'Oops...',
+              text: this.message,
+            });
+          },
+        );
+      } else if (this.getUrl === 'edit') {
+        FundraisingService.putFundraising(this.fundraising.id, this.fundraising).then(
+          () => {
+            this.message = 'Your fundraising is updated';
+            this.$swal({
+              icon: 'success',
+              title: 'Success',
+              text: this.message,
+              timer: 2000,
+              timerProgressBar: true,
+              onClose: () => {
+                this.$router.push('/fundraising-list');
+              },
+            });
+          },
+          (error) => {
+            this.message = error.response.data.errorMessage
+              || error.response.data.status;
+            this.$swal({
+              icon: 'error',
+              title: 'Oops...',
+              text: this.message,
+            });
+          },
+        );
+      }
+    },
+  },
+  mounted() {
+    if (this.getUrl === 'edit') {
+      FundraisingService.getFundraisingById(this.$route.path.split('/')[2]).then(
+        (response) => {
+          this.fundraising = response.data.value;
+          this.banks = response.data.value.banks;
+          this.startDate = null;
+          this.status = 'Pending';
+        },
+        (error) => {
+          this.message = error.response.data.errorMessage
+              || error.response.data.status;
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: this.message,
+          });
+        },
+      );
+    } else {
+      this.banks = [
+        {
+          bankId: 0, name: null, accountNumber: null, accountHolder: null,
+        },
+      ];
+    }
   },
 };
 </script>

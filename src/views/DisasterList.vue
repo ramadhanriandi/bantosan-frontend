@@ -19,7 +19,7 @@
           </div>
           <router-link
             class="ml-3 d-flex align-items-center"
-            :to="getUser && getUser.username ? '/reported-disasters/create' : '/login'"
+            :to="loggedIn ? '/reported-disasters/create' : '/login'"
           >
             <button class="btn btn-red-reverse col px-3">Create a disaster report</button>
           </router-link>
@@ -61,9 +61,9 @@
 
 <script>
 import _ from 'lodash';
-import { mapGetters } from 'vuex';
 import vPagination from 'vue-plain-pagination';
 import utils from '@/assets/js/utils';
+import DisasterService from '../services/disaster.service';
 
 export default {
   components: { vPagination },
@@ -92,162 +92,37 @@ export default {
     getMaxPage() {
       return Math.ceil(this.getDisasters.count / this.limit);
     },
-    ...mapGetters([
-      'getUser',
-    ]),
+    loggedIn() {
+      return this.$store.state.auth.status.loggedIn;
+    },
   },
-  data() {
-    return {
-      disasters: [
-        {
-          id: '1',
-          name: 'Banjir A',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-10, 125] },
-          },
-          category: 'Flood',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          updatedAt: '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '2',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-9, 120] },
-          },
-          category: 'Flood',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          updatedAt: '2013-07-14T01:00:00+01:00',
-        },
-        {
-          id: '3',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-8, 110] },
-          },
-          category: 'Earthquake',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          updatedAt: '2012-07-13T01:00:00+01:00',
-        },
-        {
-          id: '4',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-7, 115] },
-          },
-          category: 'Tsunami',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          updatedAt: '2020-05-13T01:00:00+01:00',
-        },
-        {
-          id: '5',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [-1, 135] },
-          },
-          category: 'Wildfire',
-          createdAt: '2012-07-14T01:00:00+01:00',
-          updatedAt: '2012-07-04T01:00:00+01:00',
-        },
-        {
-          id: '6',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [1, 100] },
-          },
-          category:
-           'Wildfire',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '7',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [3, 95] },
-          },
-          category:
-           'Wildfire',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '8',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [2, 97] },
-          },
-          category:
-           'Wildfire',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '9',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [0, 120] },
-          },
-          category:
-           'Landslide',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '10',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [1, 110] },
-          },
-          category:
-           'Landslide',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-        {
-          id: '11',
-          name: 'Banjir Buahbatu',
-          location: {
-            name: 'Kec. Buahbatu, Bandung',
-            map: { coordinates: [2, 127] },
-          },
-          category:
-           'Volcano',
-          createdAt:
-           '2012-07-14T01:00:00+01:00',
-          updatedAt:
-           '2012-07-14T01:00:00+01:00',
-        },
-      ],
-      limit: 10,
-      searchName: '',
-      page: 1,
-    };
-  },
+  data: () => ({
+    disasters: [],
+    limit: 10,
+    searchName: '',
+    page: 1,
+    message: '',
+  }),
   methods: {
     getReportedDate(date) {
       return utils.convertDate(new Date(date));
     },
+  },
+  mounted() {
+    DisasterService.getAllDisasters({ display: 'Show' }).then(
+      (response) => {
+        this.disasters = response.data.content;
+      },
+      (error) => {
+        this.message = error.response.data.errorMessage
+              || error.response.data.status;
+        this.$swal({
+          icon: 'error',
+          title: 'Oops...',
+          text: this.message,
+        });
+      },
+    );
   },
 };
 </script>
