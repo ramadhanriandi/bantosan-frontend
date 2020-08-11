@@ -28,11 +28,6 @@ pipeline {
     }
     stage('Staging') {
       steps {
-        sh 'npm i -g http-server'
-      }
-    }
-    stage('Deploy') {
-      steps {
         sh 'http-server ./dist'
       }
     }
