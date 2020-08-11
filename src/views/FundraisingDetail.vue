@@ -452,20 +452,23 @@ export default {
     FundraisingService.getFundraisingById(this.$route.path.split('/')[2]).then(
       (fundraisingResponse) => {
         this.fundraising = fundraisingResponse.data.value;
-        DonationService.getAllDonations({ fundraisingId: this.fundraising.id }).then(
-          (donationResponse) => {
-            this.donations = donationResponse.data.content;
-          },
-          (error) => {
-            this.errorMessage = error.response.data.errorMessage
-                  || error.response.data.status;
-            this.$swal({
-              icon: 'error',
-              title: 'Oops...',
-              text: this.errorMessage,
-            });
-          },
-        );
+
+        if (this.currentUser.id === this.fundraising.organizer.id) {
+          DonationService.getAllDonations({ fundraisingId: this.fundraising.id }).then(
+            (donationResponse) => {
+              this.donations = donationResponse.data.content;
+            },
+            (error) => {
+              this.errorMessage = error.response.data.errorMessage
+                    || error.response.data.status;
+              this.$swal({
+                icon: 'error',
+                title: 'Oops...',
+                text: this.errorMessage,
+              });
+            },
+          );
+        }
       },
       (error) => {
         this.message = error.response.data.errorMessage
