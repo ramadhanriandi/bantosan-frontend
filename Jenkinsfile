@@ -26,10 +26,5 @@ pipeline {
         sh 'npm run build'
       }
     }
-    stage('Staging') {
-      steps {
-        sh 'http-server ./dist'
-      }
-    }
   }
 }
