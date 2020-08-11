@@ -20,6 +20,7 @@
           <router-link
             class="ml-3 d-flex align-items-center"
             :to="loggedIn ? '/reported-disasters/create' : '/login'"
+            v-if="!isAdmin"
           >
             <button class="btn btn-red-reverse col px-3">Create a disaster report</button>
           </router-link>
@@ -68,6 +69,9 @@ import DisasterService from '../services/disaster.service';
 export default {
   components: { vPagination },
   computed: {
+    currentUser() {
+      return this.$store.state.auth.user;
+    },
     getDisasters() {
       const filteredDisasters = this.searchName === ''
         ? this.disasters
@@ -95,6 +99,9 @@ export default {
     loggedIn() {
       return this.$store.state.auth.status.loggedIn;
     },
+    isAdmin() {
+      return this.currentUser && this.currentUser.roles.includes('ROLE_ADMIN');
+    },
   },
   data: () => ({
     disasters: [],
@@ -111,7 +118,7 @@ export default {
   mounted() {
     DisasterService.getAllDisasters({ display: 'Show' }).then(
       (response) => {
-        this.disasters = response.data.content;
+        this.disasters = _.filter(response.data.content, ['status', 'Verified']);
       },
       (error) => {
         this.message = error.response.data.errorMessage

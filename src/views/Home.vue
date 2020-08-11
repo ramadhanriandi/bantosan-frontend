@@ -107,7 +107,7 @@ export default {
   mounted() {
     DisasterService.getAllDisasters({ display: 'Show' }).then(
       (response) => {
-        this.disasters = response.data.content;
+        this.disasters = _.filter(response.data.content, ['status', 'Verified']);
       },
       (error) => {
         this.errorMessage = error.response.data.errorMessage
