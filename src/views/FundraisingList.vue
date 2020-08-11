@@ -17,6 +17,7 @@
           <router-link
             class="ml-3 d-flex align-items-center"
             :to="loggedIn ? '/fundraising-list/create' : '/login'"
+            v-if="!isAdmin"
           >
             <button class="btn btn-purple-reverse col px-3">Create a fundraising</button>
           </router-link>
@@ -48,6 +49,9 @@ export default {
     CardItem,
   },
   computed: {
+    currentUser() {
+      return this.$store.state.auth.user;
+    },
     getFundraisings() {
       const filteredFundraisings = this.searchName === ''
         ? this.fundraisings
@@ -61,6 +65,9 @@ export default {
     },
     loggedIn() {
       return this.$store.state.auth.status.loggedIn;
+    },
+    isAdmin() {
+      return this.currentUser && this.currentUser.roles.includes('ROLE_ADMIN');
     },
   },
   data: () => ({
